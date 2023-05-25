@@ -801,13 +801,18 @@ def processar_arquivo_CONTRATOS_MAN():
             def valorIva():
                 valorFaturaEntry = entry.get()
                 valorFaturaEntry2 = entry2.get_date()
+                valorFaturaEntry3 = entry3.get()
                 # Carregar o arquivo Excel em um DataFrame
                 df = pd.read_excel(excel_path)
 
                 df['Data Fatura'] = valorFaturaEntry2
+
                 df[6] = df[6].str.replace(',', '.').astype(float)
                 df['IVA'] = int(valorFaturaEntry)
                 df['Valor C/ Iva'] = (((df['IVA']/100) + 1) * df[6])
+                df[4] = "MAN"
+                df[5] = "Contrato Manutenção e Reparação MN Iva Taxa Normal"
+                df["Nº Fatura"] = valorFaturaEntry3
 
                 df.to_excel(excel_path, index=False)
 
@@ -824,6 +829,11 @@ def processar_arquivo_CONTRATOS_MAN():
             label1.pack()
             entry = tk.Entry(root)
             entry.pack()
+
+            label3 = tk.Label(root, text="Nº da Fatura")
+            label3.pack()
+            entry3 = tk.Entry(root)
+            entry3.pack()
 
             label2 = tk.Label(root, text="Dia Fatura")
             label2.pack()
@@ -1223,7 +1233,8 @@ def alemanha():
         target_cell = None
         for row in worksheet.iter_rows():
             for cell in row:
-                if cell.value == "Zeitpunkt der Einfahrt":
+                if cell.value == "PRODUKT/LEISTUNG":
+                    # if cell.value == "Zeitpunkt der Einfahrt":
                     target_cell = cell
                     break
             if target_cell:
@@ -1243,7 +1254,7 @@ def alemanha():
                 none_count = 0
 
                 for value in row_data:
-                    if value == None or value == 'N°CS' or value == 'N°chassis' or value == 'Tipo' or value == 'Nº Cliente':
+                    if value == None or value == 'Einfahrt':
                         none_count += 1
 
                 if none_count < 4:
@@ -1259,6 +1270,8 @@ def alemanha():
 
             messagebox.showinfo(
                 'Concluído', 'O arquivo foi processado com sucesso.')
+
+# CTIB
 
 
 def teste():
@@ -1302,7 +1315,7 @@ def teste():
         for row in worksheet.iter_rows():
 
             for cell in row:
-                if cell.value == "Zeitpunkt der Einfahrt":
+                if cell.value == "Requisição:":
                     target_cell = cell
                     break
             if target_cell:
@@ -1322,7 +1335,7 @@ def teste():
                 none_count = 0
 
                 for value in row_data:
-                    if value == None or value == 'Zeitpunkt' or value == 'Einfahrt' or value == 'Zeitpunkt' or value == 'Ausfahrt':
+                    if value == None or value == 'Motivo':
                         none_count += 1
                 if none_count < 4:
                     data.append(row_data)
@@ -1337,8 +1350,42 @@ def teste():
                 # Escrever o DataFrame de volta no arquivo Excel
                 df.to_excel(excel_path, index=False)
 
-                messagebox.showinfo(
-                    'Concluído', 'O arquivo foi processado com sucesso.')
+            # Read the Excel file
+            df = pd.read_excel(excel_path,)
+
+            # Transpose the DataFrame to convert columns to rows
+            # Obter o valor da célula
+            valor4 = df.loc[0, 1]
+            # Remove the header
+            df = df.iloc[1:]
+
+            # Remove the last row
+            df = df.iloc[:-1]
+            df = df.transpose()
+
+            # Obter o valor da célula
+            valor = df.loc[1, 7]
+            valor2 = df.loc[2, 7]
+            # Atribuir o valor da célula acima
+            df.loc[0, 7] = valor
+            df.loc[1, 7] = valor2
+
+            # Atribuir um valor vazio à célula acima
+            df.loc[2, 7] = pd.NA
+            df[7] = df[7].str.replace('€', '')
+            df['Motivo Inspecao'] = valor4
+            df['IVA'] = 23
+
+            df = df.drop(0)
+            valorIVA = (df['IVA']/100)+1
+            valor5 = float(df.loc[1, 7].replace(',', '.'))
+            df['Total S/IVA'] = valor5 / valorIVA
+            # Remove the last row
+            df = df.iloc[:-3]
+            # Save the transposed DataFrame to a new Excel file
+            df.to_excel(excel_path, index=False)
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
 
 
 def selecionar_opcao(event):
@@ -1409,6 +1456,8 @@ def selecionar_opcao(event):
 
     elif opcao == "--------------------------------------------":
         teste()
+    elif opcao == "------------------------------1-------------":
+        alemanha()
 
     else:
         processar_arquivo_PorFazer()
