@@ -23,6 +23,11 @@ import tabula
 from openpyxl import Workbook
 
 
+def processar_arquivo_PorFazer():
+    messagebox.showinfo('Falta de Configuração',
+                        'A importação que escolheu ainda não foi configurada')
+
+
 def processar_arquivo_Toll_Collect():
     # Abrir a caixa de diálogo de seleção de arquivo
     filename = filedialog.askopenfilename(
@@ -1312,9 +1317,12 @@ def processar_arquivo_WTRANSNET():
 
                 # Escrever o DataFrame de volta no arquivo Excel
                 df.to_excel(excel_path, index=False)
-
-                messagebox.showinfo(
-                    'Concluído', 'O arquivo foi processado com sucesso.')
+            df = pd.read_excel(excel_path)
+            df[7] = df[7].replace('.', ',')
+            # Save the transposed DataFrame to a new Excel file
+            df.to_excel(excel_path, index=False)
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
 
 
 # AINDA POR FAZER
@@ -1498,6 +1506,27 @@ def processar_arquivo_STARRESSA_ALEMANHA_PORTAGENS():
             'Concluído', 'O arquivo foi processado com sucesso.')
 
 
+def processar_arquivo_CONTRATOS_MERCEDES():
+    # Abrir a caixa de diálogo de seleção de arquivo
+    filename = filedialog.askopenfilename(
+        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
+    if (filename == ''):
+        messagebox.showinfo('Erro Sem Ficheiro',
+                            'Nenhum arquivo foi selecionado.')
+    else:
+
+        # Carregar o arquivo Excel em um DataFrame
+        df = pd.read_excel(filename)
+        # Remove o caminho e a extensao do nome do ficheiro
+        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
+
+        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
+        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
+        # Exibir uma mensagem de conclusão
+        messagebox.showinfo(
+            'Concluído', 'O arquivo foi processado com sucesso.')
+
+
 def alemanha():
 
     filename = filedialog.askopenfilename(
@@ -1617,7 +1646,7 @@ def teste():
         for row in worksheet.iter_rows():
 
             for cell in row:
-                if cell.value == "Zeitpunkt der Einfahrt":
+                if cell.value == "Descripcion":
                     target_cell = cell
                     break
             if target_cell:
@@ -1708,10 +1737,10 @@ def selecionar_opcao(event):
         processar_arquivo_CONTRATOS_IVECO()
 
     elif opcao == "AS24 - ESPANHA":
-        processar_arquivo_AS24_ESPANHA()
+        processar_arquivo_AS24_ESPANHA_PORTAGENS()
 
     elif opcao == "AS24 - FRANÇA":
-        processar_arquivo_AS24_FRANCA()
+        processar_arquivo_AS24_FRANCA_COMBUSTIVEL()
 
     elif opcao == "Toll Collect":
         processar_arquivo_Toll_Collect()
