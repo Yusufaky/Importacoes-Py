@@ -1325,16 +1325,66 @@ def processar_arquivo_WTRANSNET():
                 'Concluído', 'O arquivo foi processado com sucesso.')
 
 
-# AINDA POR FAZER
-
 def processar_arquivo_TRIMBLE():
     # Abrir a caixa de diálogo de seleção de arquivo
     def obter_valor():
-        valorFaturaEntry = entry.get_date()
-        valorFaturaEntry2 = entry2.get()
+        valorMES = entry.get_date()
+        valorFATURA = entry3.get()
+
+        valorData = str(valorMES)
         # Carregar o arquivo Excel em um DataFrame
-        print(valorFaturaEntry)
-        print(valorFaturaEntry2)
+        # Configuração da conexão com o SQL Server
+        server = 'SBs2019-ISAAC\ABMN'
+        database = 'trimble'
+        username = 'Bds'
+        password = 'olivettiBDS1'
+
+        # Criação da conexão com o SQL Server
+        conn = pyodbc.connect(
+            'DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD=' + password)
+
+        # Parâmetros da stored procedure
+        # Chamar a stored procedure com os parâmetros
+        cursor = conn.cursor()
+        cursor.execute(
+            "{CALL ImportacoesTrimble (?)}", (valorData))
+
+        # Recuperar os resultados em uma lista de DataFrames
+        tables = []
+
+        while True:
+            if cursor.description is not None:
+                columns = [column[0] for column in cursor.description]
+                rows = cursor.fetchall()
+                df = pd.DataFrame.from_records(rows, columns=columns)
+                tables.append(df)
+            if not cursor.nextset():
+                break
+
+        # Fecha a conexão com o banco de dados
+        conn.close()
+
+        # Verifica se existem tabelas a serem salvas
+        if len(tables) == 0:
+            messagebox.showinfo(
+                'ERRO', 'Nenhuma tabela encontrada para salvar.')
+            return
+
+        # Gera o arquivo Excel com as tabelas retornadas
+        excel_file = 'C:\\importacao\\Trimble' + \
+            valorData+'.xlsx'
+
+        with pd.ExcelWriter(excel_file) as writer:
+            for i, table in enumerate(tables):
+                table.to_excel(
+                    writer, sheet_name=f'Tabela {i+1}', index=False)
+        df = pd.read_excel(excel_file)
+
+        df['nrdoc'] = valorFATURA
+
+        df['datafatura'] = valorMES.strftime('%Y-%m-%d')
+
+        df.to_excel(excel_file, index=False)
         messagebox.showinfo(
             'Concluído', 'O arquivo foi processado com sucesso.')
         root.destroy()
@@ -1344,15 +1394,20 @@ def processar_arquivo_TRIMBLE():
     root.resizable(width=False, height=False)
 
     # Criar rótulos
-    label1 = tk.Label(root, text="Mês: (em valor numérico)")
+    label1 = tk.Label(root, text="Data:")
     label1.pack()
     entry = DateEntry(root, selectmode="day", date_pattern='yyyy-mm-dd')
     entry.pack()
 
-    label3 = tk.Label(root, text="Valor da Fatura:")
-    label3.pack()
-    entry2 = tk.Entry(root)
-    entry2.pack()
+    # label3 = tk.Label(root, text="Ano:")
+    # label3.pack()
+    # entry2 = tk.Entry(root)
+    # entry2.pack()
+
+    label2 = tk.Label(root, text="Valor Fatura:")
+    label2.pack()
+    entry3 = tk.Entry(root)
+    entry3.pack()
 
     # Criar botão para obter o valor
     btn_obter_valor = tk.Button(
@@ -1362,75 +1417,7 @@ def processar_arquivo_TRIMBLE():
     # Executar o loop principal da janela
     root.mainloop()
 
-
-def processar_arquivo_CONTRATOS_IVECO():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.txt')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-        def obter_valor():
-            valorFaturaEntry = entry.get_date()
-            valorFaturaEntry2 = entry2.get()
-            # Carregar o arquivo Excel em um DataFrame
-            df = pd.read_csv(filename, delimiter='\t')
-            # Remove o caminho e a extensao do nome do ficheiro
-            nome_arquivo, extensao = os.path.splitext(
-                os.path.basename(filename))
-
-            # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-            df.to_excel('C:\\importacao\\' +
-                        nome_arquivo + '.xlsx', index=False)
-            print(valorFaturaEntry)
-            print(valorFaturaEntry2)
-            messagebox.showinfo(
-                'Concluído', 'O arquivo foi processado com sucesso.')
-            root.destroy()
-
-        # Criar janela principal
-        root = tk.Tk()
-        root.resizable(width=False, height=False)
-        # Criar rótulos
-        label1 = tk.Label(root, text="Data:")
-        label1.pack()
-        entry = DateEntry(root, selectmode="day", date_pattern='yyyy-mm-dd')
-        entry.pack()
-
-        label3 = tk.Label(root, text="Valor da Fatura:")
-        label3.pack()
-        entry2 = tk.Entry(root)
-        entry2.pack()
-
-        # Criar botão para obter o valor
-        btn_obter_valor = tk.Button(
-            root, text="Enviar dados", command=obter_valor)
-        btn_obter_valor.pack()
-
-        # Executar o loop principal da janela
-        root.mainloop()
-
-
-def processar_arquivo_CONTRATOS_SCANIA():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename)
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
+# AINDA POR FAZER
 
 
 def processar_arquivo_AS24_PORTUGAL():
@@ -1486,27 +1473,6 @@ def processar_arquivo_STARRESSA_BELGICA_PORTAGENS():
 
 
 def processar_arquivo_STARRESSA_ALEMANHA_PORTAGENS():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename)
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
-
-
-def processar_arquivo_CONTRATOS_MERCEDES():
     # Abrir a caixa de diálogo de seleção de arquivo
     filename = filedialog.askopenfilename(
         initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
@@ -1646,7 +1612,7 @@ def teste():
         for row in worksheet.iter_rows():
 
             for cell in row:
-                if cell.value == "Descripcion":
+                if cell.value == "Zeitpunkt der Einfahrt":
                     target_cell = cell
                     break
             if target_cell:
@@ -1683,6 +1649,97 @@ def teste():
 
                 messagebox.showinfo(
                     'Concluído', 'O arquivo foi processado com sucesso.')
+
+
+def processar_arquivo_CONTRATOS_IVECO():
+    # Abrir a caixa de diálogo de seleção de arquivo
+    filename = filedialog.askopenfilename(
+        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.txt')])
+    if (filename == ''):
+        messagebox.showinfo('Erro Sem Ficheiro',
+                            'Nenhum arquivo foi selecionado.')
+    else:
+        def obter_valor():
+            valorFaturaEntry = entry.get_date()
+            valorFaturaEntry2 = entry2.get()
+            # Carregar o arquivo Excel em um DataFrame
+            df = pd.read_csv(filename, delimiter='\t')
+            # Remove o caminho e a extensao do nome do ficheiro
+            nome_arquivo, extensao = os.path.splitext(
+                os.path.basename(filename))
+
+            # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
+            df.to_excel('C:\\importacao\\' +
+                        nome_arquivo + '.xlsx', index=False)
+            print(valorFaturaEntry)
+            print(valorFaturaEntry2)
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
+            root.destroy()
+
+        # Criar janela principal
+        root = tk.Tk()
+        root.resizable(width=False, height=False)
+        # Criar rótulos
+        label1 = tk.Label(root, text="Data:")
+        label1.pack()
+        entry = DateEntry(root, selectmode="day", date_pattern='yyyy-mm-dd')
+        entry.pack()
+
+        label3 = tk.Label(root, text="Valor da Fatura:")
+        label3.pack()
+        entry2 = tk.Entry(root)
+        entry2.pack()
+
+        # Criar botão para obter o valor
+        btn_obter_valor = tk.Button(
+            root, text="Enviar dados", command=obter_valor)
+        btn_obter_valor.pack()
+
+        # Executar o loop principal da janela
+        root.mainloop()
+
+
+def processar_arquivo_CONTRATOS_SCANIA():
+    # Abrir a caixa de diálogo de seleção de arquivo
+    filename = filedialog.askopenfilename(
+        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
+    if (filename == ''):
+        messagebox.showinfo('Erro Sem Ficheiro',
+                            'Nenhum arquivo foi selecionado.')
+    else:
+
+        # Carregar o arquivo Excel em um DataFrame
+        df = pd.read_excel(filename)
+        # Remove o caminho e a extensao do nome do ficheiro
+        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
+
+        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
+        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
+        # Exibir uma mensagem de conclusão
+        messagebox.showinfo(
+            'Concluído', 'O arquivo foi processado com sucesso.')
+
+
+def processar_arquivo_CONTRATOS_MERCEDES():
+    # Abrir a caixa de diálogo de seleção de arquivo
+    filename = filedialog.askopenfilename(
+        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
+    if (filename == ''):
+        messagebox.showinfo('Erro Sem Ficheiro',
+                            'Nenhum arquivo foi selecionado.')
+    else:
+
+        # Carregar o arquivo Excel em um DataFrame
+        df = pd.read_excel(filename)
+        # Remove o caminho e a extensao do nome do ficheiro
+        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
+
+        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
+        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
+        # Exibir uma mensagem de conclusão
+        messagebox.showinfo(
+            'Concluído', 'O arquivo foi processado com sucesso.')
 
 
 def selecionar_opcao(event):
@@ -1752,7 +1809,7 @@ def selecionar_opcao(event):
         processar_arquivo_WTRANSNET()
 
     elif opcao == "--------------------------------------------":
-        teste()
+        processar_arquivo_CTIB()
     elif opcao == "------------------------------1-------------":
         alemanha()
 
