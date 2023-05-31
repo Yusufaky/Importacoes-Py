@@ -1,12 +1,11 @@
 from PIL import ImageTk, Image
 import datetime
 import tkinter as tk
-import xlrd
-import xlwt
+# import xlrd
+# import xlwt
 from tkcalendar import DateEntry
 from tkinter import filedialog
 from tkinter import messagebox
-from tkinter import ttk
 import pandas as pd
 import openpyxl
 import pyodbc
@@ -19,7 +18,6 @@ import re
 import numpy as np
 import chardet
 import pdfplumber
-import tabula
 from openpyxl import Workbook
 
 
@@ -1420,6 +1418,29 @@ def processar_arquivo_TRIMBLE():
 # AINDA POR FAZER
 
 
+def processar_arquivo_VIALTIS():
+    # Abrir a caixa de diálogo de seleção de arquivo
+    filename = filedialog.askopenfilename(
+        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
+    if (filename == ''):
+        messagebox.showinfo('Erro Sem Ficheiro',
+                            'Nenhum arquivo foi selecionado.')
+    else:
+
+        # Carregar o arquivo Excel em um DataFrame
+        df = pd.read_excel(filename, sheet_name="Details")
+        # Remove o caminho e a extensao do nome do ficheiro
+        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
+
+        df["ORDEM DE CARGA"] = "OC 132"
+
+        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
+        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
+        # Exibir uma mensagem de conclusão
+        messagebox.showinfo(
+            'Concluído', 'O arquivo foi processado com sucesso.')
+
+
 def processar_arquivo_AS24_PORTUGAL():
     # Abrir a caixa de diálogo de seleção de arquivo
     filename = filedialog.askopenfilename(
@@ -1612,7 +1633,7 @@ def teste():
         for row in worksheet.iter_rows():
 
             for cell in row:
-                if cell.value == "Zeitpunkt der Einfahrt":
+                if cell.value == "Descrição":
                     target_cell = cell
                     break
             if target_cell:
@@ -1632,7 +1653,7 @@ def teste():
                 none_count = 0
 
                 for value in row_data:
-                    if value == None or value == 'Zeitpunkt' or value == 'Einfahrt' or value == 'Zeitpunkt' or value == 'Ausfahrt':
+                    if value == None or value == 'Quantida':
                         none_count += 1
                 if none_count < 4:
                     data.append(row_data)
@@ -1808,8 +1829,11 @@ def selecionar_opcao(event):
     elif opcao == "WTRANSNET":
         processar_arquivo_WTRANSNET()
 
+    elif opcao == "VIALTIS":
+        processar_arquivo_VIALTIS()
+
     elif opcao == "--------------------------------------------":
-        processar_arquivo_CTIB()
+        teste()
     elif opcao == "------------------------------1-------------":
         alemanha()
 
@@ -1861,6 +1885,7 @@ combo_box = tk.ttk.Combobox(
                                     "IDS",
                                     "CONTRATOS DE MANUTENÇÃO - MAN",
                                     "BOMBA PRÓPRIA - ABLUE PARQUE",
+                                    "VIALTIS",
                                     "--------------------------------------------",
                                     "AS24 - PORTUGAL",
                                     "WTRANSNET",
