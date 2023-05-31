@@ -352,6 +352,14 @@ def processar_arquivo_ILIDIO_MOTA():
         df.save(
             'C:\\importacao\\' + nome_arquivo + '.xlsx')
 
+        df = pd.read_excel('C:\\importacao\\' + nome_arquivo + '.xlsx')
+        linhas_para_remover = df[df["Design"] == "OFERTA CAFÉ"].index
+
+        # Remove as linhas do DataFrame
+        df.drop(linhas_para_remover, inplace=True)
+
+        df.to_excel(
+            'C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
         # Exibir uma mensagem de conclusão
         messagebox.showinfo(
             'Concluído', 'O arquivo foi processado com sucesso.')
@@ -627,7 +635,7 @@ def processar_arquivo_VALCARCE():
                             'Nenhum arquivo foi selecionado.')
     else:
         def obter_valor():
-            valorFaturaEntry = entry.get()
+            valorFaturaEntry = entry.get_date()
             valorFaturaEntry2 = entry2.get()
             # Carregar o arquivo Excel em um DataFrame
             df = pd.read_csv(filename, delimiter='\t')
@@ -643,12 +651,13 @@ def processar_arquivo_VALCARCE():
             # Carregando o arquivo XLSX
             df = pd.read_excel(ficheiro)
             cabecalho = list(df)
+            print(cabecalho)
             #  Altera as "," para "." para converter em float
-            Precio = [s.replace(",", ".") for s in df['Precio']]
+            Precio = [s.replace(",", ".") for s in df['Pre.Clien']]
             Dto = [s.replace(",", ".") for s in df['Dto.Clien']]
             Cantidad = [s.replace(",", ".") for s in df['Cantidad']]
 
-            df['Preco'] = df['Precio']
+            df['Preco'] = df['Pre.Clien']
             df['Desconto'] = df['Dto.Clien']
 
             # Converte as colunas em float
@@ -686,14 +695,14 @@ def processar_arquivo_VALCARCE():
             df['PxQ'] = PxQ
 
             # Seleciona a os elementos do Cabeçalho
-            df['Fatura'] = valorFaturaEntry
+            df['Mes de Faturacao'] = valorFaturaEntry
             df['Taxa de IVA'] = int(valorFaturaEntry2)
 
             cabecalho.append('Preco')
             cabecalho.append('Desconto')
             cabecalho.append('P-D')
             cabecalho.append('PxQ')
-            cabecalho.append('Fatura')
+            cabecalho.append('Mes de Faturacao')
             cabecalho.append('Taxa de IVA')
 
             # Selecionar as colunas a serem exportadas
@@ -714,9 +723,10 @@ def processar_arquivo_VALCARCE():
         root.resizable(width=False, height=False)
 
         # Criar widget Entry para entrada de texto
-        label1 = tk.Label(root, text="Valor da Fatura")
+        label1 = tk.Label(root, text="Mês de Faturação")
         label1.pack()
-        entry = tk.Entry(root)
+        entry = DateEntry(root, selectmode="day",
+                          date_pattern='yyyy-mm-dd')
         entry.pack()
         label2 = tk.Label(root, text="Valor do IVA")
         label2.pack()
