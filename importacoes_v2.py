@@ -118,7 +118,6 @@ def processar_arquivo_VIAVERDE():
 
             df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
                              '.csv', encoding=encoding, delimiter=";")
-            # Filtrar as linhas que contêm 'I. de Portugal' ou 'Brisa'
 
             dados1 = df.loc[(df['OPERADOR'] == 'B2') | (df['OPERADOR'] == 'E1') |
                             (df['OPERADOR'] == 'TM') | (df['OPERADOR'] == 'P3') | (df['OPERADOR'] == 'VI') | (df['OPERADOR'] == 'B1') |
@@ -126,87 +125,80 @@ def processar_arquivo_VIAVERDE():
                             (df['OPERADOR'] == 'I1') | (df['OPERADOR'] == 'IF') | (df['OPERADOR'] == 'E2') | (df['OPERADOR'] == 'BP') |
                             (df['OPERADOR'] == 'P2') | (df['OPERADOR'] == 'L1') | (df['OPERADOR'].str.contains('I. de Portugal'))]
 
-            dados1['OPERADOR'] = 'Infraestruturas de Portugal'
-            dados1['DATA ENTRADA'] = pd.to_datetime(
+            dados1.loc[:, 'OPERADOR'] = 'Infraestruturas de Portugal'
+            dados1.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados1['DATA ENTRADA'], format='%Y-%m-%d')
-            dados1['DATA SAÍDA'] = pd.to_datetime(
+            dados1.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados1['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados2 = df.loc[(df['OPERADOR'] == 'BR') | (
                 df['OPERADOR'].str.contains('Brisa'))]
-            dados2['OPERADOR'] = 'Brisa Concessao Rodoviaria, S.'
-            dados2['DATA ENTRADA'] = pd.to_datetime(
+            dados2.loc[:, 'OPERADOR'] = 'Brisa Concessao Rodoviaria, S.'
+            dados2.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados2['DATA ENTRADA'], format='%Y-%m-%d')
-            dados2['DATA SAÍDA'] = pd.to_datetime(
+            dados2.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados2['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados3 = df.loc[(df['OPERADOR'] == 'S1') | (
                 df['OPERADOR'].str.contains('Scutvias'))]
-
-            dados3['OPERADOR'] = 'Scutvias - Autoestradas da Beira, S.A.'
-            dados3['DATA ENTRADA'] = pd.to_datetime(
+            dados3.loc[:, 'OPERADOR'] = 'Scutvias - Autoestradas da Beira, S.A.'
+            dados3.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados3['DATA ENTRADA'], format='%Y-%m-%d')
-            dados3['DATA SAÍDA'] = pd.to_datetime(
+            dados3.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados3['DATA SAÍDA'], format='%Y-%m-%d')
 
-            dados4 = df.loc[(df['OPERADOR'] == 'BRAGAPARQUES')]
-            dados4['OPERADOR'] = 'Bragaparques, S.A.'
-            dados4['DATA ENTRADA'] = pd.to_datetime(
+            dados4 = df.loc[(df['OPERADOR'].str.contains('BRAGAPARQUES'))]
+            dados4.loc[:, 'OPERADOR'] = 'Bragaparques, S.A.'
+            dados4.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados4['DATA ENTRADA'], format='%Y-%m-%d')
+            dados4.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+                dados3['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados5 = df.loc[(df['OPERADOR'] == 'AA') | (
                             df['OPERADOR'].str.contains('AUTOESTRADAS DO ATLÂNTICO'))]
-
-            dados5['OPERADOR'] = 'AUTOESTRADAS DO ATLANTICO'
-            dados5['DATA ENTRADA'] = pd.to_datetime(
+            dados5.loc[:, 'OPERADOR'] = 'AUTOESTRADAS DO ATLANTICO'
+            dados5.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados5['DATA ENTRADA'], format='%Y-%m-%d')
-            dados5['DATA SAÍDA'] = pd.to_datetime(
+            dados5.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados5['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados6 = df.loc[(df['OPERADOR'] == 'DL') | (
                 df['OPERADOR'].str.contains('AEDL'))]
-
-            dados6['OPERADOR'] = 'Aedl - Estradas de Douro Litoral S.A.'
-            dados6['DATA ENTRADA'] = pd.to_datetime(
+            dados6.loc[:, 'OPERADOR'] = 'Aedl - Estradas de Douro Litoral S.A.'
+            dados6.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados6['DATA ENTRADA'], format='%Y-%m-%d')
-            dados6['DATA SAÍDA'] = pd.to_datetime(
+            dados6.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados6['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados7 = df.loc[(df['OPERADOR'] == 'VV') | (
                 df['OPERADOR'].str.contains('VIA VERDE'))]
-
-            dados7['OPERADOR'] = 'Via Verde Portugal, S.A.'
-            dados7['DATA ENTRADA'] = pd.to_datetime(
+            dados7.loc[:, 'OPERADOR'] = 'Via Verde Portugal, S.A.'
+            dados7.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados7['DATA ENTRADA'], format='%Y-%m-%d')
-            dados7['DATA SAÍDA'] = pd.to_datetime(
+            dados7.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados7['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados8 = df.loc[(df['OPERADOR'] == 'VE')]
-
-            dados8['OPERADOR'] = 'Via Verde Pot.(Ve) Espanha'
-            dados8['DATA ENTRADA'] = pd.to_datetime(
+            dados8.loc[:, 'OPERADOR'] = 'Via Verde Pot.(Ve) Espanha'
+            dados8.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados8['DATA ENTRADA'], format='%Y-%m-%d')
-            dados8['DATA SAÍDA'] = pd.to_datetime(
+            dados8.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados8['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados9 = df.loc[(df['OPERADOR'] == 'LS') | (
                 df['OPERADOR'].str.contains('Lusoponte'))]
-
-            dados9['OPERADOR'] = 'Lusoponte Concessionario para Trave.Tejo'
-            dados9['DATA ENTRADA'] = pd.to_datetime(
+            dados9.loc[:, 'OPERADOR'] = 'Lusoponte Concessionario para Trave.Tejo'
+            dados9.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados9['DATA ENTRADA'], format='%Y-%m-%d')
-
-            dados9['DATA SAÍDA'] = pd.to_datetime(
+            dados9.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados9['DATA SAÍDA'], format='%Y-%m-%d')
 
             dados10 = df.loc[(df['OPERADOR'] == 'BL') | (
                 df['OPERADOR'].str.contains('BRISAL'))]
-
-            dados10['OPERADOR'] = 'Brisal - Auto Estrada Do Litoral'
-
-            dados10['DATA ENTRADA'] = pd.to_datetime(
+            dados10.loc[:, 'OPERADOR'] = 'Brisal - Auto Estrada Do Litoral'
+            dados10.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
                 dados10['DATA ENTRADA'], format='%Y-%m-%d')
-            dados10['DATA SAÍDA'] = pd.to_datetime(
+            dados10.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
                 dados10['DATA SAÍDA'], format='%Y-%m-%d')
 
             # Salvar os dados filtrados em arquivos CSV separados
@@ -1436,19 +1428,40 @@ def processar_arquivo_VIALTIS():
         messagebox.showinfo('Erro Sem Ficheiro',
                             'Nenhum arquivo foi selecionado.')
     else:
+        def obter_valor():
+            valorFATURA = entry3.get()
+            # Carregar o arquivo Excel em um DataFrame
+            df = pd.read_excel(filename, sheet_name="Details")
+            # Remove o caminho e a extensao do nome do ficheiro
+            nome_arquivo, extensao = os.path.splitext(
+                os.path.basename(filename))
 
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename, sheet_name="Details")
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
+            df["ORDEM DE CARGA"] = "OC 132"
+            df["NumeroFATURA"] = valorFATURA
 
-        df["ORDEM DE CARGA"] = "OC 132"
+            # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
+            df.to_excel('C:\\importacao\\' +
+                        nome_arquivo + '.xlsx', index=False)
+            # Exibir uma mensagem de conclusão
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
+            root.destroy()
 
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
+    # Criar janela principal
+    root = tk.Tk()
+    root.resizable(width=False, height=False)
+
+    label2 = tk.Label(root, text="Valor Fatura:")
+    label2.pack()
+    entry3 = tk.Entry(root)
+    entry3.pack()
+
+    # Criar botão para obter o valor
+    btn_obter_valor = tk.Button(
+        root, text="Enviar dados", command=obter_valor)
+    btn_obter_valor.pack()
+    # Executar o loop principal da janela
+    root.mainloop()
 
 
 def processar_arquivo_AS24_PORTUGAL():
