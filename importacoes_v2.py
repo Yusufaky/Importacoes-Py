@@ -6,6 +6,7 @@ import tkinter as tk
 from tkcalendar import DateEntry
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import ttk
 import pandas as pd
 import openpyxl
 import pyodbc
@@ -18,7 +19,11 @@ import re
 import numpy as np
 import chardet
 import pdfplumber
+import tabula
 from openpyxl import Workbook
+
+# CRiAR O EXE
+# cxfreeze seu_script.py --target-dir dist --base-name Win32GUI
 
 
 def processar_arquivo_PorFazer():
@@ -34,30 +39,56 @@ def processar_arquivo_Toll_Collect():
         messagebox.showinfo('Erro Sem Ficheiro',
                             'Nenhum arquivo foi selecionado.')
     else:
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-        # Abrir o arquivo CSV para leitura
-        with open(filename, newline='') as f_in, open('C:\\importacao\\' + nome_arquivo + '.csv', 'w', newline='') as f_out:
-            # Criar um leitor CSV e um gravador CSV
-            # Ler as linhas do arquivo CSV
-            linhas = list(csv.reader(f_in))
-            gravador = csv.writer(f_out)
+        def obter_valor():
+            valorFaturaEntry = entry.get()
+            nome_arquivo, extensao = os.path.splitext(
+                os.path.basename(filename))
+            # Abrir o arquivo CSV para leitura
+            with open(filename, newline='') as f_in, open('C:\\importacao\\' + nome_arquivo + '.csv', 'w', newline='') as f_out:
+                # Criar um leitor CSV e um gravador CSV
+                # Ler as linhas do arquivo CSV
+                linhas = list(csv.reader(f_in))
+                gravador = csv.writer(f_out)
 
-            linhas = linhas[:-3]
-            gravador.writerows(linhas)
+                linhas = linhas[:-3]
+                gravador.writerows(linhas)
 
-        with open('C:\\importacao\\' + nome_arquivo + '.csv', 'rb') as f:
-            result = chardet.detect(f.read())
-            encoding = result['encoding']
+            with open('C:\\importacao\\' + nome_arquivo + '.csv', 'rb') as f:
+                result = chardet.detect(f.read())
+                encoding = result['encoding']
 
-        df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
-                         '.csv', encoding=encoding, delimiter=";")
+            df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
+                             '.csv', encoding=encoding, delimiter=";")
 
-        df.to_excel('C:\\importacao\\' + nome_arquivo +
-                    '.xlsx', index=False)
+            df.to_excel('C:\\importacao\\' + nome_arquivo +
+                        '.xlsx', index=False)
 
-        os.remove('C:\\importacao\\' + nome_arquivo + '.csv')
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
+            os.remove('C:\\importacao\\' + nome_arquivo + '.csv')
+
+            df = pd.read_excel('C:\\importacao\\' + nome_arquivo +
+                               '.xlsx')
+            df["FATURA"] = valorFaturaEntry
+            df.to_excel('C:\\importacao\\' + nome_arquivo +
+                        '.xlsx', index=False)
+
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
+            root.destroy()
+
+        # Criar janela principal
+        root = tk.Tk()
+        root.resizable(width=False, height=False)
+        label = tk.Label(root, text="Fatura:")
+        label.pack()
+        entry = tk.Entry(root)
+        entry.pack()
+        # Criar botão para obter o valor
+        btn_obter_valor = tk.Button(
+            root, text="Enviar dados", command=obter_valor)
+        btn_obter_valor.pack()
+
+        # Executar o loop principal da janela
+        root.mainloop()
 
 
 def processar_arquivo_NORPETROL():
@@ -68,27 +99,122 @@ def processar_arquivo_NORPETROL():
         messagebox.showinfo('Erro Sem Ficheiro',
                             'Nenhum arquivo foi selecionado.')
     else:
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-    with open(filename, newline='') as f_in, open('C:\\importacao\\' + nome_arquivo + '.csv', 'w', newline='') as f_out:
+        def obter_valor():
+            valorFaturaEntry = entry.get()
+            nome_arquivo, extensao = os.path.splitext(
+                os.path.basename(filename))
+            with open(filename, newline='') as f_in, open('C:\\importacao\\' + nome_arquivo + '.csv', 'w', newline='') as f_out:
 
-        reader = csv.reader(f_in, delimiter=';')
-        writer = csv.writer(f_out, delimiter=';')
+                reader = csv.reader(f_in, delimiter=';')
+                writer = csv.writer(f_out, delimiter=';')
 
-        # Percorrer cada linha do arquivo de entrada
-        for row in reader:
-            # Substituir todos os pontos por vírgulas na coluna desejada
-            row[4] = row[4].replace('.', ',')
-            row[6] = row[6].replace('.', '')
-            row[7] = row[7].replace('.', '')
-            row[8] = row[8].replace('.', '')
-            row[9] = row[9].replace('.', '')
-            row[10] = row[10].replace('.', '')
-            row[11] = row[11].replace('.', '')
-            # Escrever a linha modificada no arquivo de saída
-            writer.writerow(row)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
+                # Percorrer cada linha do arquivo de entrada
+                for row in reader:
+                    # Substituir todos os pontos por vírgulas na coluna desejada
+                    row[4] = row[4].replace('.', ',')
+                    row[6] = row[6].replace('.', '')
+                    row[7] = row[7].replace('.', '')
+                    row[8] = row[8].replace('.', '')
+                    row[9] = row[9].replace('.', '')
+                    row[10] = row[10].replace('.', '')
+                    row[11] = row[11].replace('.', '')
+                    row[12] = valorFaturaEntry
+                    # Escrever a linha modificada no arquivo de saída
+                    writer.writerow(row)
+
+            # Exibir uma mensagem de conclusão
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
+            root.destroy()
+
+        root = tk.Tk()
+        root.resizable(width=False, height=False)
+        label = tk.Label(root, text="Fatura:")
+        label.pack()
+        entry = tk.Entry(root)
+        entry.pack()
+        # Criar botão para obter o valor
+        btn_obter_valor = tk.Button(
+            root, text="Enviar dados", command=obter_valor)
+        btn_obter_valor.pack()
+
+        # Executar o loop principal da janela
+        root.mainloop()
+
+
+def processar_arquivo_ALTICE():
+
+    # Abrir a caixa de diálogo de seleção de arquivo
+    filename = filedialog.askopenfilename(
+        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.csv')])
+    if (filename == ''):
+        messagebox.showinfo('Erro Sem Ficheiro',
+                            'Nenhum arquivo foi selecionado.')
+    else:
+        def obter_valor():
+            valorMES = entry.get_date()
+            nome_arquivo, extensao = os.path.splitext(
+                os.path.basename(filename))
+            with open(filename, newline='') as f_in, open('C:\\importacao\\' + nome_arquivo + '.csv', 'w', newline='') as f_out:
+
+                # Criar um leitor CSV e um gravador CSV
+                leitor = csv.reader(f_in, delimiter=';')
+                gravador = csv.writer(f_out, delimiter=';')
+
+                rows = list(leitor)[6:-3]
+                gravador.writerows(rows)
+            with open('C:\\importacao\\' + nome_arquivo + '.csv', 'rb') as f:
+                result = chardet.detect(f.read())
+                encoding = result['encoding']
+
+            df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
+                             '.csv', encoding=encoding, delimiter=";")
+
+            df.to_excel('C:\\importacao\\' + nome_arquivo +
+                        '.xlsx', index=False)
+
+            os.remove('C:\\importacao\\' + nome_arquivo + '.csv')
+            # Exibir uma mensagem de conclusão
+            df = pd.read_excel('C:\\importacao\\' + nome_arquivo +
+                               '.xlsx')
+
+            teste = df.loc[0, "Plano de Preços"]
+
+            num_rows = df.shape[0]
+            num_rows2 = float(num_rows + 1)
+            numero = float(teste.replace(',', '.'))
+            media = numero/num_rows2
+
+            df["VALOR MENSALIDADE"] = media
+            valor = df["Valor (s/IVA)"].str.replace(',', '.').astype(float)
+            df['VALOR DO CARTAO'] = media + valor
+
+            df['DATA FATURA'] = valorMES
+
+            df = df.iloc[1:]
+            df.to_excel('C:\\importacao\\' + nome_arquivo +
+                        '.xlsx', index=False)
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
+            root.destroy()
+
+    # Criar janela principal
+    root = tk.Tk()
+    root.resizable(width=False, height=False)
+
+    # Criar rótulos
+    label1 = tk.Label(root, text="Data:")
+    label1.pack()
+    entry = DateEntry(root, selectmode="day", date_pattern='yyyy-mm-dd')
+    entry.pack()
+
+    # Criar botão para obter o valor
+    btn_obter_valor = tk.Button(
+        root, text="Enviar dados", command=obter_valor)
+    btn_obter_valor.pack()
+
+    # Executar o loop principal da janela
+    root.mainloop()
 
 
 def processar_arquivo_VIAVERDE():
@@ -112,132 +238,162 @@ def processar_arquivo_VIAVERDE():
                 if i >= 7:  # Excluir as primeiras sete linhas
                     gravador.writerow(linha)
             # Ler o arquivo CSV
-            with open('C:\\importacao\\' + nome_arquivo + '.csv', 'rb') as f:
-                result = chardet.detect(f.read())
-                encoding = result['encoding']
+        with open('C:\\importacao\\' + nome_arquivo + '.csv', 'rb') as f:
+            result = chardet.detect(f.read())
+            encoding = result['encoding']
 
-            df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
-                             '.csv', encoding=encoding, delimiter=";")
+        df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
+                         '.csv', encoding=encoding, delimiter=";")
 
-            dados1 = df.loc[(df['OPERADOR'] == 'B2') | (df['OPERADOR'] == 'E1') |
-                            (df['OPERADOR'] == 'TM') | (df['OPERADOR'] == 'P3') | (df['OPERADOR'] == 'VI') | (df['OPERADOR'] == 'B1') |
-                            (df['OPERADOR'] == 'P1') | (df['OPERADOR'] == 'O1') | (df['OPERADOR'] == 'VD') | (df['OPERADOR'] == 'N1') |
-                            (df['OPERADOR'] == 'I1') | (df['OPERADOR'] == 'IF') | (df['OPERADOR'] == 'E2') | (df['OPERADOR'] == 'BP') |
-                            (df['OPERADOR'] == 'P2') | (df['OPERADOR'] == 'L1') | (df['OPERADOR'].str.contains('I. de Portugal'))]
+        dados1 = df.loc[(df['OPERADOR'] == 'B2') | (df['OPERADOR'] == 'E1') | (df['OPERADOR'] == 'TM') |
+                        (df['OPERADOR'] == 'P3') | (df['OPERADOR'] == 'VI') | (df['OPERADOR'] == 'B1') |
+                        (df['OPERADOR'] == 'P1') | (df['OPERADOR'] == 'O1') | (df['OPERADOR'] == 'VD') |
+                        (df['OPERADOR'] == 'N1') | (df['OPERADOR'] == 'I1') | (df['OPERADOR'] == 'IF') |
+                        (df['OPERADOR'] == 'E2') | (df['OPERADOR'] == 'BP') | (df['OPERADOR'] == 'P2') |
+                        (df['OPERADOR'] == 'L1') | (df['OPERADOR'].str.contains('I. de Portugal'))]
 
-            dados1.loc[:, 'OPERADOR'] = 'Infraestruturas de Portugal'
-            dados1.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados1['DATA ENTRADA'], format='%Y-%m-%d')
-            dados1.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados1['DATA SAÍDA'], format='%Y-%m-%d')
+        dados1.loc[:, 'OPERADOR'] = 'Infraestruturas de Portugal'
+        dados1.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados1['DATA ENTRADA'], format='%d/%m/%Y')
+        dados1.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados1['DATA SAÍDA'], format='%d/%m/%Y')
+        dados1.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados1['DATA PAGAMENTO'], format='%d/%m/%Y')
 
-            dados2 = df.loc[(df['OPERADOR'] == 'BR') | (
-                df['OPERADOR'].str.contains('Brisa'))]
-            dados2.loc[:, 'OPERADOR'] = 'Brisa Concessao Rodoviaria, S.'
-            dados2.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados2['DATA ENTRADA'], format='%Y-%m-%d')
-            dados2.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados2['DATA SAÍDA'], format='%Y-%m-%d')
+        dados2 = df.loc[(df['OPERADOR'] == 'BR') | (
+            df['OPERADOR'].str.contains('Brisa'))]
 
-            dados3 = df.loc[(df['OPERADOR'] == 'S1') | (
-                df['OPERADOR'].str.contains('Scutvias'))]
-            dados3.loc[:, 'OPERADOR'] = 'Scutvias - Autoestradas da Beira, S.A.'
-            dados3.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados3['DATA ENTRADA'], format='%Y-%m-%d')
-            dados3.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados3['DATA SAÍDA'], format='%Y-%m-%d')
+        dados2.loc[:, 'OPERADOR'] = 'Brisa Concessao Rodoviaria, S.'
+        dados2.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados2['DATA ENTRADA'], format='%d/%m/%Y')
+        dados2.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados2['DATA SAÍDA'], format='%d/%m/%Y')
+        dados2.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados2['DATA PAGAMENTO'], format='%d/%m/%Y')
 
-            dados4 = df.loc[(df['OPERADOR'].str.contains('BRAGAPARQUES'))]
-            dados4.loc[:, 'OPERADOR'] = 'Bragaparques, S.A.'
-            dados4.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados4['DATA ENTRADA'], format='%Y-%m-%d')
-            dados4.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados3['DATA SAÍDA'], format='%Y-%m-%d')
+        dados3 = df.loc[(df['OPERADOR'] == 'S1') | (
+            df['OPERADOR'].str.contains('Scutvias'))]
 
-            dados5 = df.loc[(df['OPERADOR'] == 'AA') | (
-                            df['OPERADOR'].str.contains('AUTOESTRADAS DO ATLÂNTICO'))]
-            dados5.loc[:, 'OPERADOR'] = 'AUTOESTRADAS DO ATLANTICO'
-            dados5.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados5['DATA ENTRADA'], format='%Y-%m-%d')
-            dados5.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados5['DATA SAÍDA'], format='%Y-%m-%d')
+        dados3.loc[:, 'OPERADOR'] = 'Scutvias - Autoestradas da Beira, S.A.'
+        dados3.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados3['DATA ENTRADA'], format='%d/%m/%Y')
+        dados3.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados3['DATA SAÍDA'], format='%d/%m/%Y')
+        dados3.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados3['DATA PAGAMENTO'], format='%d/%m/%Y')
 
-            dados6 = df.loc[(df['OPERADOR'] == 'DL') | (
-                df['OPERADOR'].str.contains('AEDL'))]
-            dados6.loc[:, 'OPERADOR'] = 'Aedl - Estradas de Douro Litoral S.A.'
-            dados6.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados6['DATA ENTRADA'], format='%Y-%m-%d')
-            dados6.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados6['DATA SAÍDA'], format='%Y-%m-%d')
+        dados4 = df.loc[(df['OPERADOR'].str.contains('BRAGAPARQUES'))]
 
-            dados7 = df.loc[(df['OPERADOR'] == 'VV') | (
-                df['OPERADOR'].str.contains('VIA VERDE'))]
-            dados7.loc[:, 'OPERADOR'] = 'Via Verde Portugal, S.A.'
-            dados7.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados7['DATA ENTRADA'], format='%Y-%m-%d')
-            dados7.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados7['DATA SAÍDA'], format='%Y-%m-%d')
+        dados4.loc[:, 'OPERADOR'] = 'Bragaparques, S.A.'
+        dados4.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados4['DATA ENTRADA'], format='%d/%m/%Y')
+        dados4.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados4['DATA SAÍDA'], format='%d/%m/%Y')
+        dados4.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados4['DATA PAGAMENTO'], format='%d/%m/%Y')
 
-            dados8 = df.loc[(df['OPERADOR'] == 'VE')]
-            dados8.loc[:, 'OPERADOR'] = 'Via Verde Pot.(Ve) Espanha'
-            dados8.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados8['DATA ENTRADA'], format='%Y-%m-%d')
-            dados8.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados8['DATA SAÍDA'], format='%Y-%m-%d')
+        dados5 = df.loc[(df['OPERADOR'] == 'AA') | (
+                        df['OPERADOR'].str.contains('AUTOESTRADAS DO ATLÂNTICO'))]
 
-            dados9 = df.loc[(df['OPERADOR'] == 'LS') | (
-                df['OPERADOR'].str.contains('Lusoponte'))]
-            dados9.loc[:, 'OPERADOR'] = 'Lusoponte Concessionario para Trave.Tejo'
-            dados9.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados9['DATA ENTRADA'], format='%Y-%m-%d')
-            dados9.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados9['DATA SAÍDA'], format='%Y-%m-%d')
+        dados5.loc[:, 'OPERADOR'] = 'AUTOESTRADAS DO ATLANTICO'
+        dados5.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados5['DATA ENTRADA'], format='%d/%m/%Y')
+        dados5.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados5['DATA SAÍDA'], format='%d/%m/%Y')
+        dados5.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados5['DATA PAGAMENTO'], format='%d/%m/%Y')
 
-            dados10 = df.loc[(df['OPERADOR'] == 'BL') | (
-                df['OPERADOR'].str.contains('BRISAL'))]
-            dados10.loc[:, 'OPERADOR'] = 'Brisal - Auto Estrada Do Litoral'
-            dados10.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-                dados10['DATA ENTRADA'], format='%Y-%m-%d')
-            dados10.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-                dados10['DATA SAÍDA'], format='%Y-%m-%d')
+        dados6 = df.loc[(df['OPERADOR'] == 'DL') | (
+            df['OPERADOR'].str.contains('AEDL'))]
 
-            # Salvar os dados filtrados em arquivos CSV separados
-            if len(dados1) != 0:
-                dados1.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_I_Portugal.xlsx', index=False)
-            if len(dados2) != 0:
-                dados2.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_Brisa.xlsx', index=False)
-            if len(dados3) != 0:
-                dados3.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_Scutvias.xlsx', index=False)
-            if len(dados4) != 0:
-                dados4.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_BRAGAPARQUES.xlsx', index=False)
-            if len(dados5) != 0:
-                dados5.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_AUTOESTRADAS_ATLANTICO.xlsx', index=False)
-            if len(dados6) != 0:
-                dados6.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_AEDL.xlsx', index=False)
-            if len(dados7) != 0:
-                dados7.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_VIA_VERDE_PORTUGAL.xlsx', index=False)
-            if len(dados8) != 0:
-                dados8.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_VIA_VERDE_ESPANHA.xlsx', index=False)
-            if len(dados9) != 0:
-                dados9.to_excel('C:\\importacao\\' + nome_arquivo +
-                                '_LUSOPONTE.xlsx', index=False)
-            if len(dados10) != 0:
-                dados10.to_excel('C:\\importacao\\' + nome_arquivo +
-                                 '_BRISAL.xlsx', index=False)
+        dados6.loc[:, 'OPERADOR'] = 'Aedl - Estradas de Douro Litoral S.A.'
+        dados6.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados6['DATA ENTRADA'], format='%d/%m/%Y')
+        dados6.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados6['DATA SAÍDA'], format='%d/%m/%Y')
+        dados6.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados6['DATA PAGAMENTO'], format='%d/%m/%Y')
 
-        os.remove('C:\\importacao\\' + nome_arquivo + '.csv')
+        dados7 = df.loc[(df['OPERADOR'].str.contains('VV')) | (
+            df['OPERADOR'].str.contains('VIA VERDE'))]
 
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
+        dados7.loc[:, 'OPERADOR'] = 'Via Verde Portugal, S.A.'
+        dados7.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados7['DATA ENTRADA'], format='%d/%m/%Y')
+        dados7.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados7['DATA SAÍDA'], format='%d/%m/%Y')
+        dados7.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados7['DATA PAGAMENTO'], format='%d/%m/%Y')
+
+        dados8 = df.loc[(df['OPERADOR'] == 'VE')]
+
+        dados8.loc[:, 'OPERADOR'] = 'Via Verde Pot.(Ve) Espanha'
+        dados8.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados8['DATA ENTRADA'], format='%d/%m/%Y')
+        dados8.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados8['DATA SAÍDA'], format='%d/%m/%Y')
+        dados8.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados8['DATA PAGAMENTO'], format='%d/%m/%Y')
+
+        dados9 = df.loc[(df['OPERADOR'] == 'LS') | (
+            df['OPERADOR'].str.contains('Lusoponte'))]
+
+        dados9.loc[:, 'OPERADOR'] = 'Lusoponte Concessionario para Trave.Tejo'
+        dados9.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados9['DATA ENTRADA'], format='%d/%m/%Y')
+        dados9.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados9['DATA SAÍDA'], format='%d/%m/%Y')
+        dados9.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados9['DATA PAGAMENTO'], format='%d/%m/%Y')
+
+        dados10 = df.loc[(df['OPERADOR'] == 'BL') | (
+            df['OPERADOR'].str.contains('BRISAL'))]
+
+        dados10.loc[:, 'OPERADOR'] = 'Brisal - Auto Estrada Do Litoral'
+        dados10.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
+            dados10['DATA ENTRADA'], format='%d/%m/%Y')
+        dados10.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
+            dados10['DATA SAÍDA'], format='%d/%m/%Y')
+        dados10.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
+            dados10['DATA PAGAMENTO'], format='%d/%m/%Y')
+
+        # Salvar os dados filtrados em arquivos CSV separados
+        if len(dados1) != 0:
+            dados1.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_I_Portugal.xlsx', index=False)
+        if len(dados2) != 0:
+            dados2.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_Brisa.xlsx', index=False)
+        if len(dados3) != 0:
+            dados3.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_Scutvias.xlsx', index=False)
+        if len(dados4) != 0:
+            dados4.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_BRAGAPARQUES.xlsx', index=False)
+        if len(dados5) != 0:
+            dados5.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_AUTOESTRADAS_ATLANTICO.xlsx', index=False)
+        if len(dados6) != 0:
+            dados6.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_AEDL.xlsx', index=False)
+        if len(dados7) != 0:
+            dados7.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_VIA_VERDE_PORTUGAL.xlsx', index=False)
+        if len(dados8) != 0:
+            dados8.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_VIA_VERDE_ESPANHA.xlsx', index=False)
+        if len(dados9) != 0:
+            dados9.to_excel('C:\\importacao\\' + nome_arquivo +
+                            '_LUSOPONTE.xlsx', index=False)
+        if len(dados10) != 0:
+            dados10.to_excel('C:\\importacao\\' + nome_arquivo +
+                             '_BRISAL.xlsx', index=False)
+
+    os.remove('C:\\importacao\\' + nome_arquivo + '.csv')
+
+    # Exibir uma mensagem de conclusão
+    messagebox.showinfo(
+        'Concluído', 'O arquivo foi processado com sucesso.')
 
 
 def processar_arquivo_STARRESSA_ESPANHA_GASOLEO():
@@ -446,36 +602,60 @@ def processar_arquivo_STARRESSA_SUICA_PORTAGENS():
         messagebox.showinfo('Erro Sem Ficheiro',
                             'Nenhum arquivo foi selecionado.')
     else:
+        def obter_valor():
+            valorFaturaEntry = entry.get()
+            # Carregar o arquivo Excel em um DataFrame
+            df = pd.read_excel(filename)
+            # Remove o caminho e a extensao do nome do ficheiro
+            nome_arquivo, extensao = os.path.splitext(
+                os.path.basename(filename))
 
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename)
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
+            df["MOEDA"] = "EURO"
+            df["Montante Operação"] = (
+                float(valorFaturaEntry)/100) * df["Montante Operação"]
 
-        # Calcular os Valores das colunas
-        def calcular_valor(row):
-            if row['% IMPOSTO'] > 0:
-                if row['Conceito'] == 'AUTOROUTES A PEAGE':
-                    count = df.loc[df['Conceito'].isin(
-                        ['AUTOROUTES A PEAGE'])].shape[0]
+            # Calcular os Valores das colunas
+            def calcular_valor(row):
+                if row['% IMPOSTO'] > 0:
+                    if row['Conceito'] == 'AUTOROUTES A PEAGE':
+                        count = df.loc[df['Conceito'].isin(
+                            ['AUTOROUTES A PEAGE'])].shape[0]
 
-                    return (row['Montante Operação'] + (df.loc[df['Conceito'] == 'GEST. DES SERVICES AUTOROUTES', 'Montante Operação'].iloc[0] / count)) / (1 + (row['% IMPOSTO'] / 100))
+                        return (row['Montante Operação'] + (df.loc[df['Conceito'] == 'GEST. DES SERVICES AUTOROUTES', 'Montante Operação'].iloc[0] / count)) / (1 + (row['% IMPOSTO'] / 100))
 
-                elif row['Conceito'] == 'GEST. DES SERVICES AUTOROUTES':
-                    return (row['Montante Operação'])
+                    elif row['Conceito'] == 'GEST. DES SERVICES AUTOROUTES':
+                        return (row['Montante Operação'])
+                    else:
+                        return (row['Montante Operação'] / (1 + (row['% IMPOSTO'] / 100)))
+
                 else:
-                    return (row['Montante Operação'] / (1 + (row['% IMPOSTO'] / 100)))
+                    return row['Montante Operação']
 
-            else:
-                return row['Montante Operação']
+            df['Comissões'] = df.apply(calcular_valor, axis=1)
 
-        df['Comissões'] = df.apply(calcular_valor, axis=1)
+            # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
+            df.to_excel('C:\\importacao\\' +
+                        nome_arquivo + '.xlsx', index=False)
+            # Exibir uma mensagem de conclusão
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
+            root.destroy()
 
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
+        # Criar janela principal
+        root = tk.Tk()
+        root.resizable(width=False, height=False)
+
+        label = tk.Label(root, text="100 Francos - EUROS")
+        label.pack()
+        entry = tk.Entry(root)
+        entry.pack()
+
+        # Criar botão para obter o valor
+        btn_obter_valor = tk.Button(
+            root, text="Enviar dados", command=obter_valor)
+        btn_obter_valor.pack()
+        # Executar o loop principal da janela
+        root.mainloop()
 
 
 def processar_arquivo_IDS():
@@ -486,27 +666,49 @@ def processar_arquivo_IDS():
         messagebox.showinfo('Erro Sem Ficheiro',
                             'Nenhum arquivo foi selecionado.')
     else:
+        def obter_valor():
+            valorFaturaEntry = entry.get()
+            # Carregar o arquivo Excel em um DataFrame
+            nome_arquivo, extensao = os.path.splitext(
+                os.path.basename(filename))
+            df = pd.read_excel(filename)
 
-        # Carregar o arquivo Excel em um DataFrame
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-        df = pd.read_excel(filename)
+            # Salvar como XLSX
+            df.to_excel('C:\\importacao\\' +
+                        nome_arquivo + '.xlsx', index=False)
 
-        # Salvar como XLSX
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
+            df = pd.read_excel('C:\\importacao\\' + nome_arquivo + '.xlsx')
 
-        df = pd.read_excel('C:\\importacao\\' + nome_arquivo + '.xlsx')
+            dados1 = df['TRS_DATE']
+            df['TRS_DATE'] = pd.to_datetime(
+                dados1, format='%Y-%m-%d').dt.date
+            dados2 = df['INVO_DATE']
+            df['INVO_DATE'] = pd.to_datetime(
+                dados2, format='%Y-%m-%d').dt.date
+            df["FATURA"] = valorFaturaEntry
 
-        dados1 = df['TRS_DATE']
-        df['TRS_DATE'] = pd.to_datetime(
-            dados1, format='%Y-%m-%d').dt.date
-        dados2 = df['INVO_DATE']
-        df['INVO_DATE'] = pd.to_datetime(
-            dados2, format='%Y-%m-%d').dt.date
+            df.to_excel('C:\\importacao\\' +
+                        nome_arquivo + '.xlsx', index=False)
 
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
+            root.destroy()
 
-    messagebox.showinfo(
-        'Concluído', 'O arquivo foi processado com sucesso.')
+        # Criar janela principal
+        root = tk.Tk()
+
+        # Criar widget Entry para entrada de texto
+        label1 = tk.Label(root, text="Fatura:")
+        label1.pack()
+        entry = tk.Entry(root)
+        entry.pack()
+        # Criar botão para obter o valor
+        btn_obter_valor = tk.Button(
+            root, text="Enviar Valores", command=obter_valor)
+        btn_obter_valor.pack()
+
+        # Executar o loop principal da janela
+        root.mainloop()
 
 
 def processar_arquivo_MONTEPIO_RENTING():
@@ -643,7 +845,6 @@ def processar_arquivo_VALCARCE():
             # Carregando o arquivo XLSX
             df = pd.read_excel(ficheiro)
             cabecalho = list(df)
-            print(cabecalho)
             #  Altera as "," para "." para converter em float
             Precio = [s.replace(",", ".") for s in df['Pre.Clien']]
             Dto = [s.replace(",", ".") for s in df['Dto.Clien']]
@@ -1021,8 +1222,13 @@ def processar_arquivo_BOMBA_PRÓPRIA_ABLUE_PARQUE():
 
         preco_Litro = (df["Total_C_Iva"] / df["Quantidade"])
 
-        pagaMais10 = ((df["Quantidade"]*preco_Litro)*1.10)
-        pagaMais20 = ((df["Quantidade"]*preco_Litro)*1.20)
+        preco_Litro = (preco_Litro/((df["IVA"]/100)+1))
+
+        pagaMais10 = (preco_Litro*1.10)
+        pagaMais20 = (preco_Litro*1.20)
+
+        pagaMais10 = (pagaMais10 * df['Quantidade'])
+        pagaMais20 = (pagaMais20 * df['Quantidade'])
 
         df["Total_C_Iva"] = pagaMais20
 
@@ -1031,45 +1237,43 @@ def processar_arquivo_BOMBA_PRÓPRIA_ABLUE_PARQUE():
         df.loc[(df['Cod_Artigo'] == 9) & (df['Empresa'] ==
                                           'ISAAC PEDROSO SRL'), 'Total_C_Iva'] = pagaMais10
 
-        df["Total_S_Iva"] = (df["Total_C_Iva"] / ((df["IVA"]/100)+1))
-
         # Condições das Lavagens
 
         # Lavagem Completa Lonas
         df.loc[(df['Cod_Artigo'] == 2) & (
-            df['Empresa'] == 'JPO'), 'Total_C_Iva'] = 30
+            df['Empresa'] == 'JPO'), 'Total_C_Iva'] = 30 * 1.23
         df.loc[(df['Cod_Artigo'] == 2) & (
             df['Empresa'] == 'JPO'), 'Total_S_Iva'] = 30
 
         df.loc[(df['Cod_Artigo'] == 2) & (df['Empresa']
-                                          == 'F. FERNANDO LDA'), 'Total_C_Iva'] = 40
+                                          == 'F. FERNANDO LDA'), 'Total_C_Iva'] = 40 * 1.23
         df.loc[(df['Cod_Artigo'] == 2) & (df['Empresa']
                                           == 'F. FERNANDO LDA'), 'Total_S_Iva'] = 40
 
         df.loc[(df['Cod_Artigo'] == 2) & (df['Empresa']
-                                          == 'TRANS JECHIU'), 'Total_C_Iva'] = 40
+                                          == 'TRANS JECHIU'), 'Total_C_Iva'] = 40 * 1.23
         df.loc[(df['Cod_Artigo'] == 2) & (df['Empresa']
                                           == 'TRANS JECHIU'), 'Total_S_Iva'] = 40
 
         # Lavagem Cisternas
         df.loc[(df['Cod_Artigo'] == 3) & (df['Empresa'] ==
-                                          'ISAAC PEDROSO SRL'), 'Total_C_Iva'] = 40
+                                          'ISAAC PEDROSO SRL'), 'Total_C_Iva'] = 40 * 1.23
         df.loc[(df['Cod_Artigo'] == 3) & (df['Empresa'] ==
                                           'ISAAC PEDROSO SRL'), 'Total_S_Iva'] = 40
 
         # Lavagem Autocarros
         df.loc[(df['Cod_Artigo'] == 6) & (
-            df['Matricula'] == 'TRANSDEV'), 'Total_C_Iva'] = 30
+            df['Matricula'] == 'TRANSDEV'), 'Total_C_Iva'] = 30 * 1.23
         df.loc[(df['Cod_Artigo'] == 6) & (
             df['Matricula'] == 'TRANSDEV'), 'Total_S_Iva'] = 30
 
         # Lavagem Ligeiros
         df.loc[(df['Cod_Artigo'] == 8) & (df['Empresa'] ==
-                                          'SEQUEIRA PEDROSO'), 'Total_C_Iva'] = 15
+                                          'SEQUEIRA PEDROSO'), 'Total_C_Iva'] = 15 * 1.23
         df.loc[(df['Cod_Artigo'] == 8) & (df['Empresa'] ==
                                           'SEQUEIRA PEDROSO'), 'Total_S_Iva'] = 15
         df.loc[(df['Cod_Artigo'] == 8) & (
-            df['Matricula'] == 'PANIPRADO'), 'Total_C_Iva'] = 20
+            df['Matricula'] == 'PANIPRADO'), 'Total_C_Iva'] = 20 * 1.23
         df.loc[(df['Cod_Artigo'] == 8) & (
             df['Matricula'] == 'PANIPRADO'), 'Total_S_Iva'] = 20
 
@@ -1181,6 +1385,7 @@ def processar_arquivo_CTIB():
             def obter_valor():
                 valorFaturaEntry = entry.get_date()
                 valorFaturaEntry2 = entry2.get()
+                valorFaturaEntry3 = entry3.get()
                 # Read the Excel file
                 df = pd.read_excel(excel_path)
 
@@ -1211,6 +1416,7 @@ def processar_arquivo_CTIB():
                 valorIVA = (df['IVA']/100)+1
                 valor5 = float(df.loc[1, 7].replace(',', '.'))
                 df['Total S/IVA'] = valor5 / valorIVA
+                df['Fatura'] = valorFaturaEntry3
                 df['Data Fatura'] = valorFaturaEntry
                 # Remove the last row
                 df = df.iloc[:-3]
@@ -1235,6 +1441,11 @@ def processar_arquivo_CTIB():
             entry2 = tk.Entry(root)
             entry2.pack()
 
+            label2 = tk.Label(root, text="Fatura:")
+            label2.pack()
+            entry3 = tk.Entry(root)
+            entry3.pack()
+
             # Criar botão para obter o valor
             btn_obter_valor = tk.Button(
                 root, text="Enviar dados", command=obter_valor)
@@ -1242,87 +1453,6 @@ def processar_arquivo_CTIB():
 
             # Executar o loop principal da janela
             root.mainloop()
-
-
-def processar_arquivo_WTRANSNET():
-
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.pdf')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-        pdf_path = filename
-
-        # Extrair as tabelas do PDF usando o camelot-py
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-        tables = camelot.read_pdf(pdf_path, flavor="stream", pages="all")
-
-        if tables:
-            dfs = []
-            for table in tables:
-                df = table.df
-                dfs.append(df)
-
-            # Concatenar todas as tabelas em um único DataFrame
-            final_df = pd.concat(dfs)
-
-            # Salvar o DataFrame em um arquivo XLSX
-            final_df.to_excel(
-                'C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-
-        # Caminho para o arquivo Excel
-        excel_path = 'C:\\importacao\\' + nome_arquivo + '.xlsx'
-
-        # Carregar o arquivo Excel
-        workbook = openpyxl.load_workbook(excel_path)
-
-        # Selecionar a planilha desejada (substitua 'Sheet1' pelo nome da sua planilha)
-        worksheet = workbook['Sheet1']
-
-        # Encontrar a célula que contém o valor "Matrícula"
-        target_cell = None
-        for row in worksheet.iter_rows():
-            for cell in row:
-                if cell.value == "Código":
-                    target_cell = cell
-                    break
-            if target_cell:
-                break
-
-        if target_cell:
-            # Obter a coluna correspondente à célula que contém o valor "Matrícula"
-            col_index = target_cell.column
-
-            # Obter os dados abaixo da célula que contém o valor "Matrícula"
-            data = []
-            none_count = 0
-
-            for row in worksheet.iter_rows(min_row=target_cell.row + 1, min_col=worksheet.min_column, max_col=worksheet.max_column):
-                row_data = [cell.value for cell in row]
-
-                none_count = 0
-
-                for value in row_data:
-                    if value == None or value == 'N°CS' or value == 'N°chassis' or value == 'Tipo' or value == 'Nº Cliente':
-                        none_count += 1
-
-                if none_count < 4:
-                    data.append(row_data)
-
-            if data:
-                # Criar um DataFrame pandas com os dados
-                df = pd.DataFrame(
-                    data, columns=[cell.value for cell in worksheet[1]])
-
-                # Escrever o DataFrame de volta no arquivo Excel
-                df.to_excel(excel_path, index=False)
-            df = pd.read_excel(excel_path)
-            df[7] = df[7].replace('.', ',')
-            # Save the transposed DataFrame to a new Excel file
-            df.to_excel(excel_path, index=False)
-            messagebox.showinfo(
-                'Concluído', 'O arquivo foi processado com sucesso.')
 
 
 def processar_arquivo_TRIMBLE():
@@ -1417,7 +1547,88 @@ def processar_arquivo_TRIMBLE():
     # Executar o loop principal da janela
     root.mainloop()
 
-# AINDA POR FAZER
+# FALTA RECEBER ORDEM DE CARGA
+
+
+def processar_arquivo_WTRANSNET():
+
+    filename = filedialog.askopenfilename(
+        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.pdf')])
+    if (filename == ''):
+        messagebox.showinfo('Erro Sem Ficheiro',
+                            'Nenhum arquivo foi selecionado.')
+    else:
+        pdf_path = filename
+
+        # Extrair as tabelas do PDF usando o camelot-py
+        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
+        tables = camelot.read_pdf(pdf_path, flavor="stream", pages="all")
+
+        if tables:
+            dfs = []
+            for table in tables:
+                df = table.df
+                dfs.append(df)
+
+            # Concatenar todas as tabelas em um único DataFrame
+            final_df = pd.concat(dfs)
+
+            # Salvar o DataFrame em um arquivo XLSX
+            final_df.to_excel(
+                'C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
+
+        # Caminho para o arquivo Excel
+        excel_path = 'C:\\importacao\\' + nome_arquivo + '.xlsx'
+
+        # Carregar o arquivo Excel
+        workbook = openpyxl.load_workbook(excel_path)
+
+        # Selecionar a planilha desejada (substitua 'Sheet1' pelo nome da sua planilha)
+        worksheet = workbook['Sheet1']
+
+        # Encontrar a célula que contém o valor "Matrícula"
+        target_cell = None
+        for row in worksheet.iter_rows():
+            for cell in row:
+                if cell.value == "Código":
+                    target_cell = cell
+                    break
+            if target_cell:
+                break
+
+        if target_cell:
+            # Obter a coluna correspondente à célula que contém o valor "Matrícula"
+            col_index = target_cell.column
+
+            # Obter os dados abaixo da célula que contém o valor "Matrícula"
+            data = []
+            none_count = 0
+
+            for row in worksheet.iter_rows(min_row=target_cell.row + 1, min_col=worksheet.min_column, max_col=worksheet.max_column):
+                row_data = [cell.value for cell in row]
+
+                none_count = 0
+
+                for value in row_data:
+                    if value == None or value == 'N°CS' or value == 'N°chassis' or value == 'Tipo' or value == 'Nº Cliente':
+                        none_count += 1
+
+                if none_count < 4:
+                    data.append(row_data)
+
+            if data:
+                # Criar um DataFrame pandas com os dados
+                df = pd.DataFrame(
+                    data, columns=[cell.value for cell in worksheet[1]])
+
+                # Escrever o DataFrame de volta no arquivo Excel
+                df.to_excel(excel_path, index=False)
+            df = pd.read_excel(excel_path)
+            df[7] = df[7].replace('.', ',')
+            # Save the transposed DataFrame to a new Excel file
+            df.to_excel(excel_path, index=False)
+            messagebox.showinfo(
+                'Concluído', 'O arquivo foi processado com sucesso.')
 
 
 def processar_arquivo_VIALTIS():
@@ -1451,7 +1662,7 @@ def processar_arquivo_VIALTIS():
     root = tk.Tk()
     root.resizable(width=False, height=False)
 
-    label2 = tk.Label(root, text="Valor Fatura:")
+    label2 = tk.Label(root, text="Numero da Fatura:")
     label2.pack()
     entry3 = tk.Entry(root)
     entry3.pack()
@@ -1460,330 +1671,6 @@ def processar_arquivo_VIALTIS():
     btn_obter_valor = tk.Button(
         root, text="Enviar dados", command=obter_valor)
     btn_obter_valor.pack()
-    # Executar o loop principal da janela
-    root.mainloop()
-
-
-def processar_arquivo_AS24_PORTUGAL():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.pdf')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-        with pdfplumber.open(filename) as pdf:
-            # Extract text from each page
-            pages_text = [page.extract_text() for page in pdf.pages]
-
-            # Create a new workbook
-            workbook = Workbook()
-            sheet = workbook.active
-
-            # Write extracted text to the workbook
-            for page, text in enumerate(pages_text):
-                sheet.cell(row=page+1, column=1, value=text)
-
-            # Save the workbook as XLSX
-            workbook.save('C:\\importacao\\' + nome_arquivo + '.xlsx')
-
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
-
-
-def processar_arquivo_STARRESSA_BELGICA_PORTAGENS():
-
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename)
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
-
-
-def processar_arquivo_STARRESSA_ALEMANHA_PORTAGENS():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename)
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
-
-
-def alemanha():
-
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.pdf')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-        pdf_path = filename
-
-        # Extrair as tabelas do PDF usando o camelot-py
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-        tables = camelot.read_pdf(pdf_path, flavor="stream", pages="all")
-
-        if tables:
-            dfs = []
-            for table in tables:
-                df = table.df
-                dfs.append(df)
-
-            # Concatenar todas as tabelas em um único DataFrame
-            final_df = pd.concat(dfs)
-
-            # Salvar o DataFrame em um arquivo XLSX
-            final_df.to_excel(
-                'C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-
-        # Caminho para o arquivo Excel
-        excel_path = 'C:\\importacao\\' + nome_arquivo + '.xlsx'
-
-        # Carregar o arquivo Excel
-        workbook = openpyxl.load_workbook(excel_path)
-
-        # Selecionar a planilha desejada (substitua 'Sheet1' pelo nome da sua planilha)
-        worksheet = workbook['Sheet1']
-
-        # Encontrar a célula que contém o valor "Matrícula"
-        target_cell = None
-        for row in worksheet.iter_rows():
-            for cell in row:
-                if cell.value == "Zeitpunkt der Einfahrt":
-                    target_cell = cell
-                    break
-            if target_cell:
-                break
-
-        if target_cell:
-            # Obter a coluna correspondente à célula que contém o valor "Matrícula"
-            col_index = target_cell.column
-
-            # Obter os dados abaixo da célula que contém o valor "Matrícula"
-            data = []
-            none_count = 0
-
-            for row in worksheet.iter_rows(min_row=target_cell.row + 1, min_col=worksheet.min_column, max_col=worksheet.max_column):
-                row_data = [cell.value for cell in row]
-
-                none_count = 0
-
-                for value in row_data:
-                    if value == None or value == 'N°CS' or value == 'N°chassis' or value == 'Tipo' or value == 'Nº Cliente':
-                        none_count += 1
-
-                if none_count < 4:
-                    data.append(row_data)
-
-            if data:
-                # Criar um DataFrame pandas com os dados
-                df = pd.DataFrame(
-                    data, columns=[cell.value for cell in worksheet[1]])
-
-                # Escrever o DataFrame de volta no arquivo Excel
-                df.to_excel(excel_path, index=False)
-
-            messagebox.showinfo(
-                'Concluído', 'O arquivo foi processado com sucesso.')
-
-
-def teste():
-
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.pdf')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-        pdf_path = filename
-
-        # Extrair as tabelas do PDF usando o camelot-py
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-        tables = camelot.read_pdf(pdf_path, flavor="stream", pages="all")
-
-        if tables:
-            dfs = []
-            for table in tables:
-                df = table.df
-                dfs.append(df)
-
-            # Concatenar todas as tabelas em um único DataFrame
-            final_df = pd.concat(dfs)
-
-            # Salvar o DataFrame em um arquivo XLSX
-            final_df.to_excel(
-                'C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-
-        # Caminho para o arquivo Excel
-        excel_path = 'C:\\importacao\\' + nome_arquivo + '.xlsx'
-
-        # Carregar o arquivo Excel
-        workbook = openpyxl.load_workbook(excel_path)
-
-        # Selecionar a planilha desejada (substitua 'Sheet1' pelo nome da sua planilha)
-        worksheet = workbook['Sheet1']
-
-        # Encontrar a célula que contém o valor "Matrícula"
-        target_cell = None
-        for row in worksheet.iter_rows():
-
-            for cell in row:
-                if cell.value == "Descrição":
-                    target_cell = cell
-                    break
-            if target_cell:
-                break
-
-        if target_cell:
-            # Obter a coluna correspondente à célula que contém o valor "Matrícula"
-            col_index = target_cell.column
-
-            # Obter os dados abaixo da célula que contém o valor "Matrícula"
-            data = []
-            none_count = 0
-
-            for row in worksheet.iter_rows(min_row=target_cell.row + 1, min_col=worksheet.min_column, max_col=worksheet.max_column):
-                row_data = [cell.value for cell in row]
-
-                none_count = 0
-
-                for value in row_data:
-                    if value == None or value == 'Quantida':
-                        none_count += 1
-                if none_count < 4:
-                    data.append(row_data)
-
-            if data:
-                # Criar um DataFrame pandas com os dados
-                df = pd.DataFrame(
-                    data, columns=[cell.value for cell in worksheet[1]])
-
-                df = df.dropna(how='all')
-                df = df.reset_index(drop=True)
-                # Escrever o DataFrame de volta no arquivo Excel
-                df.to_excel(excel_path, index=False)
-
-                messagebox.showinfo(
-                    'Concluído', 'O arquivo foi processado com sucesso.')
-
-
-def processar_arquivo_CONTRATOS_IVECO():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.txt')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-        def obter_valor():
-            valorFaturaEntry = entry.get_date()
-            valorFaturaEntry2 = entry2.get()
-            # Carregar o arquivo Excel em um DataFrame
-            df = pd.read_csv(filename, delimiter='\t')
-            # Remove o caminho e a extensao do nome do ficheiro
-            nome_arquivo, extensao = os.path.splitext(
-                os.path.basename(filename))
-
-            # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-            df.to_excel('C:\\importacao\\' +
-                        nome_arquivo + '.xlsx', index=False)
-            print(valorFaturaEntry)
-            print(valorFaturaEntry2)
-            messagebox.showinfo(
-                'Concluído', 'O arquivo foi processado com sucesso.')
-            root.destroy()
-
-        # Criar janela principal
-        root = tk.Tk()
-        root.resizable(width=False, height=False)
-        # Criar rótulos
-        label1 = tk.Label(root, text="Data:")
-        label1.pack()
-        entry = DateEntry(root, selectmode="day", date_pattern='yyyy-mm-dd')
-        entry.pack()
-
-        label3 = tk.Label(root, text="Valor da Fatura:")
-        label3.pack()
-        entry2 = tk.Entry(root)
-        entry2.pack()
-
-        # Criar botão para obter o valor
-        btn_obter_valor = tk.Button(
-            root, text="Enviar dados", command=obter_valor)
-        btn_obter_valor.pack()
-
-        # Executar o loop principal da janela
-        root.mainloop()
-
-
-def processar_arquivo_CONTRATOS_SCANIA():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename)
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
-
-
-def processar_arquivo_CONTRATOS_MERCEDES():
-    # Abrir a caixa de diálogo de seleção de arquivo
-    filename = filedialog.askopenfilename(
-        initialdir='/', title='Selecione o arquivo', filetypes=[('Arquivos do Excel', '*.xlsx')])
-    if (filename == ''):
-        messagebox.showinfo('Erro Sem Ficheiro',
-                            'Nenhum arquivo foi selecionado.')
-    else:
-
-        # Carregar o arquivo Excel em um DataFrame
-        df = pd.read_excel(filename)
-        # Remove o caminho e a extensao do nome do ficheiro
-        nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-
-        # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
-        df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
-        # Exibir uma mensagem de conclusão
-        messagebox.showinfo(
-            'Concluído', 'O arquivo foi processado com sucesso.')
 
 
 def selecionar_opcao(event):
@@ -1834,9 +1721,6 @@ def selecionar_opcao(event):
     elif opcao == "CONTRATOS DE MANUTENÇÃO - MAN":
         processar_arquivo_CONTRATOS_MAN()
 
-    elif opcao == "CONTRATOS DE MANUTENÇÃO  - IVECO":
-        processar_arquivo_CONTRATOS_IVECO()
-
     elif opcao == "AS24 - ESPANHA":
         processar_arquivo_AS24_ESPANHA_PORTAGENS()
 
@@ -1846,19 +1730,14 @@ def selecionar_opcao(event):
     elif opcao == "Toll Collect":
         processar_arquivo_Toll_Collect()
 
-    elif opcao == "AS24 - PORTUGAL":
-        processar_arquivo_AS24_PORTUGAL()
+    elif opcao == "ALTICE":
+        processar_arquivo_ALTICE()
 
     elif opcao == "WTRANSNET":
         processar_arquivo_WTRANSNET()
 
     elif opcao == "VIALTIS":
         processar_arquivo_VIALTIS()
-
-    elif opcao == "--------------------------------------------":
-        teste()
-    elif opcao == "------------------------------1-------------":
-        alemanha()
 
     else:
         processar_arquivo_PorFazer()
@@ -1901,6 +1780,7 @@ combo_box = tk.ttk.Combobox(
                                     "STARRESSA - SUÍÇA - PORTAGENS",
                                     "MONTEPIO - RENTING",
                                     "VALCARCE",
+                                    "ALTICE",
                                     "VIA VERDE",
                                     "SEGUROS",
                                     "ILIDIO MOTA",
