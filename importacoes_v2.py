@@ -244,6 +244,13 @@ def processar_arquivo_VIAVERDE():
 
         df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
                          '.csv', encoding=encoding, delimiter=";")
+        formato_esperado = '%d/%m/%Y'
+        df['DATA ENTRADA'] = pd.to_datetime(
+            df['DATA ENTRADA'], errors='coerce', format=formato_esperado)
+        df['DATA SAÍDA'] = pd.to_datetime(
+            df['DATA SAÍDA'], errors='coerce', format=formato_esperado)
+        df['DATA PAGAMENTO'] = pd.to_datetime(
+            df['DATA PAGAMENTO'], errors='coerce', format=formato_esperado)
 
         dados1 = df.loc[(df['OPERADOR'] == 'B2') | (df['OPERADOR'] == 'E1') | (df['OPERADOR'] == 'TM') |
                         (df['OPERADOR'] == 'P3') | (df['OPERADOR'] == 'VI') | (df['OPERADOR'] == 'B1') |
@@ -356,7 +363,6 @@ def processar_arquivo_VIAVERDE():
             dados10['DATA SAÍDA'], format='%d/%m/%Y')
         dados10.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
             dados10['DATA PAGAMENTO'], format='%d/%m/%Y')
-
         # Salvar os dados filtrados em arquivos CSV separados
         if len(dados1) != 0:
             dados1.to_excel('C:\\importacao\\' + nome_arquivo +
