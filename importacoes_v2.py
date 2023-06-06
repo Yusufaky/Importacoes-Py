@@ -23,7 +23,7 @@ import tabula
 from openpyxl import Workbook
 
 # CRiAR O EXE
-# cxfreeze seu_script.py --target-dir dist --base-name Win32GUI
+# cxfreeze importacoes_v2.py --target-dir dist --base-name Win32GUI --icon c:\\Users\\Marcos\\Desktop\\py\\BOLA-LUZITIC.ico
 
 
 def processar_arquivo_PorFazer():
@@ -244,13 +244,25 @@ def processar_arquivo_VIAVERDE():
 
         df = pd.read_csv('C:\\importacao\\' + nome_arquivo +
                          '.csv', encoding=encoding, delimiter=";")
-        formato_esperado = '%d/%m/%Y'
+
         df['DATA ENTRADA'] = pd.to_datetime(
-            df['DATA ENTRADA'], errors='coerce', format=formato_esperado)
+            df['DATA ENTRADA'], errors='coerce', dayfirst=True)
+
+        # Formatar novamente a coluna no formato desejado
+        df.loc[:, 'DATA ENTRADA'] = df['DATA ENTRADA'].dt.strftime('%Y-%m-%d')
+
         df['DATA SAÍDA'] = pd.to_datetime(
-            df['DATA SAÍDA'], errors='coerce', format=formato_esperado)
+            df['DATA SAÍDA'], errors='coerce', dayfirst=True)
+
+        # Formatar novamente a coluna no formato desejado
+        df.loc[:, 'DATA SAÍDA'] = df['DATA SAÍDA'].dt.strftime('%Y-%m-%d')
+
         df['DATA PAGAMENTO'] = pd.to_datetime(
-            df['DATA PAGAMENTO'], errors='coerce', format=formato_esperado)
+            df['DATA PAGAMENTO'], errors='coerce', dayfirst=True)
+
+        # Formatar novamente a coluna no formato desejado
+        df.loc[:, 'DATA PAGAMENTO'] = df['DATA PAGAMENTO'].dt.strftime(
+            '%Y-%m-%d')
 
         dados1 = df.loc[(df['OPERADOR'] == 'B2') | (df['OPERADOR'] == 'E1') | (df['OPERADOR'] == 'TM') |
                         (df['OPERADOR'] == 'P3') | (df['OPERADOR'] == 'VI') | (df['OPERADOR'] == 'B1') |
@@ -261,108 +273,108 @@ def processar_arquivo_VIAVERDE():
 
         dados1.loc[:, 'OPERADOR'] = 'Infraestruturas de Portugal'
         dados1.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados1['DATA ENTRADA'], format='%d/%m/%Y')
+            dados1['DATA ENTRADA'], format='%Y-%m-%d')
         dados1.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados1['DATA SAÍDA'], format='%d/%m/%Y')
+            dados1['DATA SAÍDA'], format='%Y-%m-%d')
         dados1.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados1['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados1['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados2 = df.loc[(df['OPERADOR'] == 'BR') | (
             df['OPERADOR'].str.contains('Brisa'))]
 
         dados2.loc[:, 'OPERADOR'] = 'Brisa Concessao Rodoviaria, S.'
         dados2.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados2['DATA ENTRADA'], format='%d/%m/%Y')
+            dados2['DATA ENTRADA'], format='%Y-%m-%d')
         dados2.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados2['DATA SAÍDA'], format='%d/%m/%Y')
+            dados2['DATA SAÍDA'], format='%Y-%m-%d')
         dados2.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados2['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados2['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados3 = df.loc[(df['OPERADOR'] == 'S1') | (
             df['OPERADOR'].str.contains('Scutvias'))]
 
         dados3.loc[:, 'OPERADOR'] = 'Scutvias - Autoestradas da Beira, S.A.'
         dados3.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados3['DATA ENTRADA'], format='%d/%m/%Y')
+            dados3['DATA ENTRADA'], format='%Y-%m-%d')
         dados3.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados3['DATA SAÍDA'], format='%d/%m/%Y')
+            dados3['DATA SAÍDA'], format='%Y-%m-%d')
         dados3.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados3['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados3['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados4 = df.loc[(df['OPERADOR'].str.contains('BRAGAPARQUES'))]
 
         dados4.loc[:, 'OPERADOR'] = 'Bragaparques, S.A.'
         dados4.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados4['DATA ENTRADA'], format='%d/%m/%Y')
+            dados4['DATA ENTRADA'], format='%Y-%m-%d')
         dados4.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados4['DATA SAÍDA'], format='%d/%m/%Y')
+            dados4['DATA SAÍDA'], format='%Y-%m-%d')
         dados4.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados4['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados4['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados5 = df.loc[(df['OPERADOR'] == 'AA') | (
                         df['OPERADOR'].str.contains('AUTOESTRADAS DO ATLÂNTICO'))]
 
         dados5.loc[:, 'OPERADOR'] = 'AUTOESTRADAS DO ATLANTICO'
         dados5.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados5['DATA ENTRADA'], format='%d/%m/%Y')
+            dados5['DATA ENTRADA'], format='%Y-%m-%d')
         dados5.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados5['DATA SAÍDA'], format='%d/%m/%Y')
+            dados5['DATA SAÍDA'], format='%Y-%m-%d')
         dados5.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados5['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados5['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados6 = df.loc[(df['OPERADOR'] == 'DL') | (
             df['OPERADOR'].str.contains('AEDL'))]
 
         dados6.loc[:, 'OPERADOR'] = 'Aedl - Estradas de Douro Litoral S.A.'
         dados6.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados6['DATA ENTRADA'], format='%d/%m/%Y')
+            dados6['DATA ENTRADA'], format='%Y-%m-%d')
         dados6.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados6['DATA SAÍDA'], format='%d/%m/%Y')
+            dados6['DATA SAÍDA'], format='%Y-%m-%d')
         dados6.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados6['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados6['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados7 = df.loc[(df['OPERADOR'].str.contains('VV')) | (
             df['OPERADOR'].str.contains('VIA VERDE'))]
 
         dados7.loc[:, 'OPERADOR'] = 'Via Verde Portugal, S.A.'
         dados7.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados7['DATA ENTRADA'], format='%d/%m/%Y')
+            dados7['DATA ENTRADA'], format='%Y-%m-%d')
         dados7.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados7['DATA SAÍDA'], format='%d/%m/%Y')
+            dados7['DATA SAÍDA'], format='%Y-%m-%d')
         dados7.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados7['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados7['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados8 = df.loc[(df['OPERADOR'] == 'VE')]
 
         dados8.loc[:, 'OPERADOR'] = 'Via Verde Pot.(Ve) Espanha'
         dados8.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados8['DATA ENTRADA'], format='%d/%m/%Y')
+            dados8['DATA ENTRADA'], format='%Y-%m-%d')
         dados8.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados8['DATA SAÍDA'], format='%d/%m/%Y')
+            dados8['DATA SAÍDA'], format='%Y-%m-%d')
         dados8.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados8['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados8['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados9 = df.loc[(df['OPERADOR'] == 'LS') | (
             df['OPERADOR'].str.contains('Lusoponte'))]
 
         dados9.loc[:, 'OPERADOR'] = 'Lusoponte Concessionario para Trave.Tejo'
         dados9.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados9['DATA ENTRADA'], format='%d/%m/%Y')
+            dados9['DATA ENTRADA'], format='%Y-%m-%d')
         dados9.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados9['DATA SAÍDA'], format='%d/%m/%Y')
+            dados9['DATA SAÍDA'], format='%Y-%m-%d')
         dados9.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados9['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados9['DATA PAGAMENTO'], format='%Y-%m-%d')
 
         dados10 = df.loc[(df['OPERADOR'] == 'BL') | (
             df['OPERADOR'].str.contains('BRISAL'))]
 
         dados10.loc[:, 'OPERADOR'] = 'Brisal - Auto Estrada Do Litoral'
         dados10.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
-            dados10['DATA ENTRADA'], format='%d/%m/%Y')
+            dados10['DATA ENTRADA'], format='%Y-%m-%d')
         dados10.loc[:, 'DATA SAÍDA'] = pd.to_datetime(
-            dados10['DATA SAÍDA'], format='%d/%m/%Y')
+            dados10['DATA SAÍDA'], format='%Y-%m-%d')
         dados10.loc[:, 'DATA PAGAMENTO'] = pd.to_datetime(
-            dados10['DATA PAGAMENTO'], format='%d/%m/%Y')
+            dados10['DATA PAGAMENTO'], format='%Y-%m-%d')
         # Salvar os dados filtrados em arquivos CSV separados
         if len(dados1) != 0:
             dados1.to_excel('C:\\importacao\\' + nome_arquivo +
