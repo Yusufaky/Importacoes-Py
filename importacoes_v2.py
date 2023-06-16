@@ -6,6 +6,7 @@ from tkcalendar import DateEntry
 from tkinter import filedialog
 from tkinter import messagebox
 import pandas as pd
+import PyPDF2
 import openpyxl
 import pyodbc
 import csv
@@ -22,6 +23,8 @@ from openpyxl import Workbook
 import base64
 from io import BytesIO
 import tempfile
+import fitz
+
 # CRiAR O EXE
 # pip install --upgrade pyinstaller
 # pip install --upgrade sqlalchemy
@@ -866,10 +869,14 @@ def processar_arquivo_VALCARCE():
             df = pd.read_excel(ficheiro)
             cabecalho = list(df)
             #  Altera as "," para "." para converter em float
-            Precio = [s.replace(",", ".") for s in df['Pre.Clien']]
-            Dto = [s.replace(",", ".") for s in df['Dto.Clien']]
-            Cantidad = [s.replace(",", ".") for s in df['Cantidad']]
-
+            Precio = [s.replace('.', '').replace(',', '.')
+                      for s in df['Pre.Clien']]
+            Dto = [s.replace('.', '').replace(',', '.')
+                   for s in df['Dto.Clien']]
+            Cantidad = [s.replace('.', '').replace(',', '.')
+                        for s in df['Cantidad']]
+            df['Cantidad'] = [s.replace('.', '').replace(
+                ',', '.') for s in df['Cantidad']]
             df['Preco'] = df['Pre.Clien']
             df['Desconto'] = df['Dto.Clien']
 
@@ -998,8 +1005,7 @@ def processar_arquivo_CONTRATOS_MAN():
 
         # Extrair as tabelas do PDF usando o camelot-py
         nome_arquivo, extensao = os.path.splitext(os.path.basename(filename))
-        tables = camelot.read_pdf(pdf_path, flavor="stream", pages="all")
-
+        tables = camelot.read_pdf(pdf_path, flavor="stream", pages="1-end")
         if tables:
             dfs = []
             for table in tables:
@@ -1051,7 +1057,6 @@ def processar_arquivo_CONTRATOS_MAN():
 
                 if none_count < 4:
                     data.append(row_data)
-
             if data:
                 # Criar um DataFrame pandas com os dados
                 df = pd.DataFrame(
@@ -1060,56 +1065,59 @@ def processar_arquivo_CONTRATOS_MAN():
                 # Escrever o DataFrame de volta no arquivo Excel
                 df.to_excel(excel_path, index=False)
 
-            def valorIva():
-                valorFaturaEntry = entry.get()
-                valorFaturaEntry2 = entry2.get_date()
-                valorFaturaEntry3 = entry3.get()
-                # Carregar o arquivo Excel em um DataFrame
-                df = pd.read_excel(excel_path)
+        # def valorIva():
+        #     valorFaturaEntry = entry.get()
+        #     valorFaturaEntry2 = entry2.get_date()
+        #     valorFaturaEntry3 = entry3.get()
+        #     # Carregar o arquivo Excel em um DataFrame
+        #     df = pd.read_excel(excel_path)
 
-                df['Data Fatura'] = valorFaturaEntry2
+        #     df['Data Fatura'] = valorFaturaEntry2
 
-                df[6] = df[6].str.replace(',', '.').astype(float)
-                df['IVA'] = int(valorFaturaEntry)
-                df['Valor C/ Iva'] = (((df['IVA']/100) + 1) * df[6])
-                df[4] = "MAN"
-                df[5] = "Contrato Manutenção e Reparação MN Iva Taxa Normal"
-                df["Nº Fatura"] = valorFaturaEntry3
+        #     df[6] = df[6].str.replace(',', '.').astype(float)
+        #     df['IVA'] = int(valorFaturaEntry)
+        #     df['Valor C/ Iva'] = (((df['IVA']/100) + 1) * df[6])
+        #     df[4] = "MAN"
+        #     df[5] = "Contrato Manutenção e Reparação MN Iva Taxa Normal"
+        #     df["Nº Fatura"] = valorFaturaEntry3
 
-                df.to_excel(excel_path, index=False)
+        #     df.to_excel(excel_path, index=False)
 
-                messagebox.showinfo(
-                    'Concluído', 'O arquivo foi processado com sucesso.')
-                root.destroy()
+        #     messagebox.showinfo(
+        #         'Concluído', 'O arquivo foi processado com sucesso.')
+        #     root.destroy()
+
+        # def sair():
+        #     root.destroy()
 
             # Criar janela principal
-            root = tk.Tk()
-            root.resizable(width=False, height=False)
+        # root = tk.Tk()
+        # root.resizable(width=False, height=False)
 
-            # Criar widget Entry para entrada de texto
-            label1 = tk.Label(root, text="Valor do IVA")
-            label1.pack()
-            entry = tk.Entry(root)
-            entry.pack()
+        # # Criar widget Entry para entrada de texto
+        # label1 = tk.Label(root, text="Valor do IVA")
+        # label1.pack()
+        # entry = tk.Entry(root)
+        # entry.pack()
 
-            label3 = tk.Label(root, text="Nº da Fatura")
-            label3.pack()
-            entry3 = tk.Entry(root)
-            entry3.pack()
+        # label3 = tk.Label(root, text="Nº da Fatura")
+        # label3.pack()
+        # entry3 = tk.Entry(root)
+        # entry3.pack()
 
-            label2 = tk.Label(root, text="Dia Fatura")
-            label2.pack()
-            entry2 = DateEntry(root, selectmode="day",
-                               date_pattern='yyyy-mm-dd')
-            entry2.pack()
+        # label2 = tk.Label(root, text="Dia Fatura")
+        # label2.pack()
+        # entry2 = DateEntry(root, selectmode="day",
+        #                    date_pattern='yyyy-mm-dd')
+        # entry2.pack()
 
-            # Criar botão para obter o valor
-            btn_obter_valor = tk.Button(
-                root, text="Enviar", command=valorIva)
-            btn_obter_valor.pack()
+        # Criar botão para obter o valor
+        # btn_obter_valor = tk.Button(
+        #     root, text="Enviar", command=valorIva)
+        # btn_obter_valor.pack()
 
-            # Executar o loop principal da janela
-            root.mainloop()
+        # Executar o loop principal da janela
+        # root.mainloop()
 
 
 def processar_arquivo_AS24_FRANCA_PORTAGENS():
@@ -1570,6 +1578,32 @@ def processar_arquivo_TRIMBLE():
 # FALTA RECEBER ORDEM DE CARGA
 
 
+def teste():
+    def extrair_texto_pdf(pdf_path):
+        doc = fitz.open(pdf_path)
+        texto = ""
+        for page in doc:
+            texto += page.get_text()
+        return texto
+
+    def salvar_em_xlsx(texto, xlsx_path):
+        linhas = texto.split("\n")
+        df = pd.DataFrame({"Texto": linhas})
+        df.to_excel(xlsx_path, index=False)
+
+    # Caminho para o arquivo PDF
+    pdf_path = 'C:\\Users\\Marcos\\Desktop\\Isac- EXCEIS\\man.pdf'
+
+    # Caminho para o arquivo XLSX
+    xlsx_path = "C:\\importacao\\arquivo.xlsx"
+
+    # Extrair o texto do PDF
+    texto = extrair_texto_pdf(pdf_path)
+
+    # Salvar em XLSX
+    salvar_em_xlsx(texto, xlsx_path)
+
+
 def processar_arquivo_WTRANSNET():
 
     filename = filedialog.askopenfilename(
@@ -1758,6 +1792,8 @@ def selecionar_opcao(event):
 
     elif opcao == "VIALTIS":
         processar_arquivo_VIALTIS()
+    elif opcao == "--------------------------------------------":
+        teste()
 
     else:
         processar_arquivo_PorFazer()
