@@ -18,12 +18,12 @@ import re
 import numpy as np
 import chardet
 import pdfplumber
-import tabula
 from openpyxl import Workbook
 import base64
 from io import BytesIO
 import tempfile
 import fitz
+import tabula
 
 # CRiAR O EXE
 # pip install --upgrade pyinstaller
@@ -1575,34 +1575,6 @@ def processar_arquivo_TRIMBLE():
     # Executar o loop principal da janela
     root.mainloop()
 
-# FALTA RECEBER ORDEM DE CARGA
-
-
-def teste():
-    def extrair_texto_pdf(pdf_path):
-        doc = fitz.open(pdf_path)
-        texto = ""
-        for page in doc:
-            texto += page.get_text()
-        return texto
-
-    def salvar_em_xlsx(texto, xlsx_path):
-        linhas = texto.split("\n")
-        df = pd.DataFrame({"Texto": linhas})
-        df.to_excel(xlsx_path, index=False)
-
-    # Caminho para o arquivo PDF
-    pdf_path = 'C:\\Users\\Marcos\\Desktop\\Isac- EXCEIS\\man.pdf'
-
-    # Caminho para o arquivo XLSX
-    xlsx_path = "C:\\importacao\\arquivo.xlsx"
-
-    # Extrair o texto do PDF
-    texto = extrair_texto_pdf(pdf_path)
-
-    # Salvar em XLSX
-    salvar_em_xlsx(texto, xlsx_path)
-
 
 def processar_arquivo_WTRANSNET():
 
@@ -1873,7 +1845,6 @@ combo_box = tk.ttk.Combobox(
                                     "CONTRATOS DE MANUTENÇÃO - MAN",
                                     "BOMBA PRÓPRIA - ABLUE PARQUE",
                                     "VIALTIS",
-                                    "--------------------------------------------",
                                     "AS24 - PORTUGAL",
                                     "WTRANSNET",
                                     "TRIMBLE",
