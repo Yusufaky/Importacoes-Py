@@ -273,7 +273,7 @@ def processar_arquivo_VIAVERDE():
                         (df['OPERADOR'] == 'P1') | (df['OPERADOR'] == 'O1') | (df['OPERADOR'] == 'VD') |
                         (df['OPERADOR'] == 'N1') | (df['OPERADOR'] == 'I1') | (df['OPERADOR'] == 'IF') |
                         (df['OPERADOR'] == 'E2') | (df['OPERADOR'] == 'BP') | (df['OPERADOR'] == 'P2') |
-                        (df['OPERADOR'] == 'L1') | (df['OPERADOR'].str.lower().str.contains('I. de Portugal'))]
+                        (df['OPERADOR'] == 'L1') | (df['OPERADOR'].str.lower().str.contains('i. de portugal'))]
 
         dados1.loc[:, 'OPERADOR'] = 'Infraestruturas de Portugal'
         dados1.loc[:, 'DATA ENTRADA'] = pd.to_datetime(
