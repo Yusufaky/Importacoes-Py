@@ -1765,8 +1765,6 @@ def selecionar_opcao(event):
 
     elif opcao == "VIALTIS":
         processar_arquivo_VIALTIS()
-    elif opcao == "--------------------------------------------":
-        teste()
 
     else:
         processar_arquivo_PorFazer()
