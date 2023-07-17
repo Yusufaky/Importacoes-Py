@@ -18,14 +18,10 @@ import datetime
 import uuid
 
 
-
-
-
 # CRIAR O EXE
 # pip install --upgrade pyinstaller
 # pip install --upgrade sqlalchemy
 # pyinstaller --onefile --windowed --icon=C:\Users\Administrador\Desktop\python\BOLA-LUZITIC.ico --hidden-import babel.numbers gui.py
-
 
 
 def load_base64_image(base64_data):
@@ -89,7 +85,7 @@ def processar_arquivo_ALTICE():
             df["VALOR MENSALIDADE"] = media
             valor = df["Valor (s/IVA)"].str.replace(',', '.').astype(float)
             df['VALOR DO CARTAO'] = media + valor
-            df['valorIva'] = (df['VALOR DO CARTAO']* 0.23)
+            df['valorIva'] = (df['VALOR DO CARTAO'] * 0.23)
 
             df['DATA FATURA'] = valorMES
 
@@ -119,19 +115,20 @@ def processar_arquivo_ALTICE():
                     # Extract the value from the 'nome' column of df_query
                     id = df_query['id'].iloc[0]
                 else:
-                    id = 'B46D277F-9A32-43BF-95DE-AB0D2016E75E'  # Define um valor vazio caso não haja resultados
+                    # Define um valor vazio caso não haja resultados
+                    id = 'B46D277F-9A32-43BF-95DE-AB0D2016E75E'
 
                 # Assign the extracted value to the 'nome' column of df
                 df.at[index, 'idMotorista'] = id
                 # Fechar a conexão com o banco de dados
             df.to_excel('C:\\importacao\\' + nome_arquivo +
                         '.xlsx', index=False)
-            
+
             dataframe = pd.read_excel('C:\\importacao\\' + nome_arquivo +
-                        '.xlsx'
-)
+                                      '.xlsx'
+                                      )
             # Iterando pelas linhas e inserindo no banco de dados
-            i=0
+            i = 0
             ficheiroID = uuid.uuid4()
             transImportacaoFicheirID = uuid.uuid4()
             for index, row in dataframe.iterrows():
@@ -154,29 +151,32 @@ def processar_arquivo_ALTICE():
                 DataDespesa = row['DATA FATURA']
 
                 # Construindo a consulta SQL de inserção
-                LinhasDespesas = "INSERT INTO dbo.LinhasDespesas ([IdCabecDespesa], [IdFolhaServico], [IdViagem], [IdViatura], [IdMotorista], [IdOrdemCarga], [IdCmr], [IdReboque], [TotalCusto], [IdDespesa], [Descricao], [Valor], [Quantidade], [IdUser], [FechadoDespesas], [IdUserDespesas], [FechadoSubsidios], [IdUserSubsidios], [ExportadoERP], [IdUserExportadoERP], [IdOperador], [Afaturar], [Faturado], [NdocDespesa], [Idcabecdoc], [ARHP], [RHP], [Custo], [IdCombustivel], [Data], [AdBlueA], [AdblueNA], [IdFornecedor], [Km], [Litros], [PostoAbastecimento], [IdPais], [Paga], [Conferida], TotalDesconto, Observacoes, IdUtilizadorCriacao, IdIVA, ValorIva, TipoDocCCT, SerieCCT, NumDocCCT, IdLinhaRH,SujeitoPassivo,Projeto,TipoOperacao, [IdEquipamento],[IdOrdemReparacao], [IdDepartamento], [IdSinistro], [DataDespesa], [IdDespesaProvisional], [IdLinhaDespConvert], [IdArmazem],[IdProjecto],[CCusto],IdaWarehouseArmazem, IdImportacaoFicheiro, idArtigo) VALUES ( NULL,NULL,NULL,NULL,'"+str(IdMotorista)+"',NULL,NULL,NULL,'"+str(TotalCusto)+"','"+str(IdDespesa)+"','"+str(Descricao)+"','"+str(Valor)+"','"+str(Quantidade)+"',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'"+str(NdocDespesa)+"',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'"+str(IdFornecedor)+"',NULL,NULL,NULL,'"+str(IdPais)+"',NULL,NULL,'"+str(Totaldesconto)+"',NULL,'"+str(IdUtilizadorCriacao)+"','"+str(IdIVA)+"','"+str(ValorIva)+"',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'"+str(DataDespesa)+"',NULL,NULL,NULL,NULL,NULL,NULL,'"+str(ficheiroID)+"','"+str(IdDespesa)+"')"
-                
+                LinhasDespesas = "INSERT INTO dbo.LinhasDespesas ([IdCabecDespesa], [IdFolhaServico], [IdViagem], [IdViatura], [IdMotorista], [IdOrdemCarga], [IdCmr], [IdReboque], [TotalCusto], [IdDespesa], [Descricao], [Valor], [Quantidade], [IdUser], [FechadoDespesas], [IdUserDespesas], [FechadoSubsidios], [IdUserSubsidios], [ExportadoERP], [IdUserExportadoERP], [IdOperador], [Afaturar], [Faturado], [NdocDespesa], [Idcabecdoc], [ARHP], [RHP], [Custo], [IdCombustivel], [Data], [AdBlueA], [AdblueNA], [IdFornecedor], [Km], [Litros], [PostoAbastecimento], [IdPais], [Paga], [Conferida], TotalDesconto, Observacoes, IdUtilizadorCriacao, IdIVA, ValorIva, TipoDocCCT, SerieCCT, NumDocCCT, IdLinhaRH,SujeitoPassivo,Projeto,TipoOperacao, [IdEquipamento],[IdOrdemReparacao], [IdDepartamento], [IdSinistro], [DataDespesa], [IdDespesaProvisional], [IdLinhaDespConvert], [IdArmazem],[IdProjecto],[CCusto],IdaWarehouseArmazem, IdImportacaoFicheiro, idArtigo) VALUES ( NULL,NULL,NULL,NULL,'"+str(
+                    IdMotorista)+"',NULL,NULL,NULL,'"+str(TotalCusto)+"','"+str(IdDespesa)+"','"+str(Descricao)+"','"+str(Valor)+"','"+str(Quantidade)+"',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'"+str(NdocDespesa)+"',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'"+str(IdFornecedor)+"',NULL,NULL,NULL,'"+str(IdPais)+"',NULL,NULL,'"+str(Totaldesconto)+"',NULL,'"+str(IdUtilizadorCriacao)+"','"+str(IdIVA)+"','"+str(ValorIva)+"',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'"+str(DataDespesa)+"',NULL,NULL,NULL,NULL,NULL,NULL,'"+str(ficheiroID)+"','"+str(IdDespesa)+"')"
+
                 # Executando a consulta SQL
                 print(LinhasDespesas)
                 cursor.execute(LinhasDespesas)
                 cursor.commit()
-                nLinhas=i+1
+                nLinhas = i+1
 
             today = datetime.date.today()
-            
 
-            aPlatImportadoFicheiro = "INSERT INTO dbo.aPlatImportadoFicheiro (Id,IdImportacaoConfBase, NomeFicheiro, IdUtilizadorCriacao) values ('"+str(ficheiroID)+"','B0173A17-6F62-4192-BF3E-A3789B99995E', '"+str(nome_arquivo)+".xlsx', '281B923E-09A7-4B73-805C-ABBEEF62C162')"
+            aPlatImportadoFicheiro = "INSERT INTO dbo.aPlatImportadoFicheiro (Id,IdImportacaoConfBase, NomeFicheiro, IdUtilizadorCriacao) values ('"+str(
+                ficheiroID)+"','B0173A17-6F62-4192-BF3E-A3789B99995E', '"+str(nome_arquivo)+".xlsx', '281B923E-09A7-4B73-805C-ABBEEF62C162')"
             print(aPlatImportadoFicheiro)
             cursor.execute(aPlatImportadoFicheiro)
             cursor.commit()
             # Commitar as alterações no banco de dados e fechar a conexão
-            
-            transImportacaoFicheiro = "INSERT INTO [TransImportacaoFicheiro] ([Id],[IdFicheiro],[IdFornecedor],[NumDoc],[DataDoc],[DtCriacao],[IdUtilizadorCriacao],[DtUltimaAlteracao],[IdUtilizadorUltimaAlteracao],[Activo]) VALUES('"+str(transImportacaoFicheirID)+"' ,'"+str(ficheiroID)+"' ,'5AA9BFA4-6A03-4053-BF52-D0417B53F952', '"+str(nome_arquivo)+"' ,'"+str(valorMES)+"' ,'"+str(today)+"','E93D1F9B-1D32-4579-AC3E-C4A2506AC345' ,'"+str(today)+"' ,NULL,1)"
+
+            transImportacaoFicheiro = "INSERT INTO [TransImportacaoFicheiro] ([Id],[IdFicheiro],[IdFornecedor],[NumDoc],[DataDoc],[DtCriacao],[IdUtilizadorCriacao],[DtUltimaAlteracao],[IdUtilizadorUltimaAlteracao],[Activo]) VALUES('"+str(
+                transImportacaoFicheirID)+"' ,'"+str(ficheiroID)+"' ,'5AA9BFA4-6A03-4053-BF52-D0417B53F952', '"+str(nome_arquivo)+"' ,'"+str(valorMES)+"' ,'"+str(today)+"','E93D1F9B-1D32-4579-AC3E-C4A2506AC345' ,'"+str(today)+"' ,NULL,1)"
             print(transImportacaoFicheiro)
             cursor.execute(transImportacaoFicheiro)
             cursor.commit()
 
-            aPlatImportadoFicheiroResumo = "INSERT INTO [aPlatImportadoFicheiroResumo] ([IdImportadoFicheiro] ,[QtdTotal] ,[QtdIgnorada]   ,[QtdFail]  ,[QtdImportada]  ,[DtFimImportacao]  ,[DtCriacao]  ,[IdUtilizadorCriacao]  ,[DtUltimaAlteracao]  ,[IdUtilizadorUltimaAlteracao],[Activo])     VALUES  ('"+str(ficheiroID)+"' ,'"+str(nLinhas)+"' ,0  ,0  , '"+str(nLinhas)+"' ,'"+str(today)+"'  ,'"+str(today)+"'  ,'281B923E-09A7-4B73-805C-ABBEEF62C162'  ,'"+str(today)+"','281B923E-09A7-4B73-805C-ABBEEF62C162'  ,1)"
+            aPlatImportadoFicheiroResumo = "INSERT INTO [aPlatImportadoFicheiroResumo] ([IdImportadoFicheiro] ,[QtdTotal] ,[QtdIgnorada]   ,[QtdFail]  ,[QtdImportada]  ,[DtFimImportacao]  ,[DtCriacao]  ,[IdUtilizadorCriacao]  ,[DtUltimaAlteracao]  ,[IdUtilizadorUltimaAlteracao],[Activo])     VALUES  ('"+str(
+                ficheiroID)+"' ,'"+str(nLinhas)+"' ,0  ,0  , '"+str(nLinhas)+"' ,'"+str(today)+"'  ,'"+str(today)+"'  ,'281B923E-09A7-4B73-805C-ABBEEF62C162'  ,'"+str(today)+"','281B923E-09A7-4B73-805C-ABBEEF62C162'  ,1)"
 
             print(aPlatImportadoFicheiroResumo)
             cursor.execute(aPlatImportadoFicheiroResumo)
@@ -1045,7 +1045,8 @@ def processar_arquivo_STARRESSA_PORTUGAL_GASOLEO():
             df.drop_duplicates(inplace=True)
 
         # Calcular os Valores das colunas
-        df['Total c / IVA'] = (df['Montante Operação'] - df['Montante desconto'])
+        df['Total c / IVA'] = (df['Montante Operação'] -
+                               df['Montante desconto'])
 
         # Exportar o DataFrame para um arquivo XLSX com as colunas selecionadas
         df.to_excel('C:\\importacao\\' + nome_arquivo + '.xlsx', index=False)
